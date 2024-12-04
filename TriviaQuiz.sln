@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "APIs", "APIs", "{CD625DCA-D527-4D5A-BBA1-2D0450CEF459}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthAPI", "AuthAPI\AuthAPI.csproj", "{66287E16-A731-432A-B816-0DD11223BD1F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuizAPI", "QuizAPI\QuizAPI.csproj", "{33FE9846-05D6-417B-AE2E-B5BC040817C9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FrontEnd", "FrontEnd", "{4D61F974-60A7-4585-8DFC-5D7234D351EC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{66287E16-A731-432A-B816-0DD11223BD1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66287E16-A731-432A-B816-0DD11223BD1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66287E16-A731-432A-B816-0DD11223BD1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66287E16-A731-432A-B816-0DD11223BD1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33FE9846-05D6-417B-AE2E-B5BC040817C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33FE9846-05D6-417B-AE2E-B5BC040817C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33FE9846-05D6-417B-AE2E-B5BC040817C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33FE9846-05D6-417B-AE2E-B5BC040817C9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{66287E16-A731-432A-B816-0DD11223BD1F} = {CD625DCA-D527-4D5A-BBA1-2D0450CEF459}
+		{33FE9846-05D6-417B-AE2E-B5BC040817C9} = {CD625DCA-D527-4D5A-BBA1-2D0450CEF459}
+	EndGlobalSection
+EndGlobal
