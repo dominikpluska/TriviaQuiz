@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<ApplicationDbContext>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IQuestionCommands, QuestionCommands>();
+builder.Services.AddScoped<IGameSessionRepository, GameSessionRepository>();
 var app = builder.Build();
 
 using var scope = app.Services.CreateScope();
@@ -15,6 +16,8 @@ await context.CreateModel();
 
 var questionRepository = scope.ServiceProvider.GetRequiredService<IQuestionRepository>();
 var questionCommands = scope.ServiceProvider.GetRequiredService<IQuestionCommands>();
+
+var gameSessionRepository = scope.ServiceProvider.GetRequiredService<IGameSessionRepository>();
 
 
 app.MapGet("/", () => "Hello World!");
@@ -29,7 +32,7 @@ app.MapDelete("/DeleteQuestion/{id}", async (int id) => await questionCommands.D
 #region Question Endpoints for Game Participants
 //User request a game session with a valid session string / id. Then the game is returned to the user. The rest is handled by a game manager which is going to keep track of 
 //how many questions there are left / what is the score etc. in memory. At the end the result is saved to the database.
-app.MapGet("/CreateGameSession", async () => await questionRepository.RequestGameSession());
+app.MapGet("/GetGameSession", async () => await gameSessionRepository.GetGameSession());
 #endregion
 
 app.Run();

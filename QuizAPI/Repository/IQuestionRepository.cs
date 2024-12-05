@@ -7,6 +7,5 @@ namespace QuizAPI.Repository
     {
         public Task<Question> GetQuestion(int id);
         public Task<IEnumerable<Question>> GetAllQuestions();
-        public Task RequestGameSession(int questionCount = 10);
     }
 }
