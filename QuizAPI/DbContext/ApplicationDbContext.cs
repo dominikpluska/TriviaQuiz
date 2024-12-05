@@ -40,7 +40,7 @@ namespace QuizAPI.DbContext
             var sql_check = @"select count(*) from Questions";
             var check_result =  await connection.ExecuteScalarAsync<int>(sql_check);
 
-            if (check_result == 0)
+            if (check_result > 10)
             {
                 var sql_insert_questions = @"INSERT INTO Questions (
                                     QuestionTitle, QuestionDescription, QuestionCategory,
