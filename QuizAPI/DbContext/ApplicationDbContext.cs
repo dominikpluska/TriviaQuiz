@@ -40,7 +40,7 @@ namespace QuizAPI.DbContext
             var sql_check = @"select count(*) from Questions";
             var check_result =  await connection.ExecuteScalarAsync<int>(sql_check);
 
-            if (check_result > 10)
+            if (check_result < 10)
             {
                 var sql_insert_questions = @"INSERT INTO Questions (
                                     QuestionTitle, QuestionDescription, QuestionCategory,
@@ -69,7 +69,7 @@ namespace QuizAPI.DbContext
                     new Question() { QuestionTitle = "JavaScript", QuestionDescription = "What was the original name of JavaScript", QuestionCategory = "Computer Science",
                                      OptionA = "Lua", OptionB = "Go", OptionC = "Matlab", OptionD = "Mocha", CorrectAnswer = "Mocha", QuestionScore = 10},
                     new Question() { QuestionTitle = "Game Engines", QuestionDescription = "Which Game Engine Uses C# as its programming language?", QuestionCategory = "Computer Science",
-                                     OptionA = "Unity", OptionB = "Unreal Engine", OptionC = "CryEngine", OptionD = "Godot", CorrectAnswer = "Unity", QuestionScore = 5},
+                                     OptionA = "Unity", OptionB = "Unreal Engine", OptionC = "CryEngine", OptionD = "RPGMaker", CorrectAnswer = "Unity", QuestionScore = 5},
                     new Question() { QuestionTitle = "Oiseau", QuestionDescription = "What does \"Oiseau\" mean in French?", QuestionCategory = "Languages",
                                      OptionA = "Fox", OptionB = "Bull", OptionC = "Bear", OptionD = "Bird", CorrectAnswer = "Bird", QuestionScore = 5},
                 };
@@ -101,6 +101,22 @@ namespace QuizAPI.DbContext
                     UserName TEXT NOT NULL, 
                     GameResults TEXT NOT NULL
                     );
+               CREATE TABLE IF NOT EXISTS 
+               ActiveGameSessions(
+                    GameSessionId TEXT NOT NULL UNIQUE,
+                    UserId INT NOT NULL, 
+                    UserName TEXT NOT NULL,
+                    Questions TEXT NOT NULL,
+                    SessionTime TEXT NOT NULL
+                );
+               CREATE TABLE IF NOT EXISTS 
+               DeactivatedGameSessions(
+                    GameSessionId TEXT NOT NULL UNIQUE,
+                    UserId INT NOT NULL, 
+                    UserName TEXT NOT NULL,
+                    Questions TEXT NOT NULL,
+                    SessionTime TEXT NOT NULL
+                );
             ";
 
             await connection.ExecuteAsync(sql);

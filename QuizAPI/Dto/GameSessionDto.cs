@@ -8,6 +8,6 @@ namespace QuizAPI.Dto
         public string GameSessionId { get; set; }
         public int UserId { get; set; }
         public string UserName { get; set; }
-        List<Tuple<QuestionDto, bool>> questions { get; set; }
+        public DateTime SessionTime { get; set; }
     }
 }

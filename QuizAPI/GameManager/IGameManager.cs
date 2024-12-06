@@ -1,8 +1,8 @@
 ﻿using QuizAPI.Dto;
 
-namespace QuizAPI.Repository
+namespace QuizAPI.GameManager
 {
-    public interface IGameSessionRepository
+    public interface IGameManager
     {
         public Task<GameSessionDto> GetGameSession(int userRequestedQuestions = 10);
     }

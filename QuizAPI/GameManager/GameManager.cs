@@ -1,33 +1,36 @@
 ﻿using Dapper;
+using QuizAPI.Commands;
 using QuizAPI.Dto;
 using QuizAPI.Models;
-using System;
-using System.Data;
 using System.Data.SQLite;
+using System.Text.Json;
 
-namespace QuizAPI.Repository
+namespace QuizAPI.GameManager
 {
-    public class GameSessionRepository : IGameSessionRepository
+    public class GameManager : IGameManager
     {
         private readonly string _connectionString;
         private readonly IConfiguration _configuration;
+        private readonly IActiveGameSessionsCommands _activeGameSessionsCommands;
 
-        public GameSessionRepository(IConfiguration configuration)
+        public GameManager(IConfiguration configuration, IActiveGameSessionsCommands activeGameSessionsCommands)
         {
             _configuration = configuration;
+            _activeGameSessionsCommands = activeGameSessionsCommands;
             _connectionString = _configuration.GetValue<string>("ConnectionStrings:DefaultConnection")!;
         }
 
         public async Task<GameSessionDto> GetGameSession(int userRequestedQuestions = 10)
         {
+            //Check if there is already a Game Session
             using var connection = CreateConnection();
 
             var sqlCheckCount = "Select count(*) from Questions";
             int questionsCount = await connection.ExecuteScalarAsync<int>(sqlCheckCount);
 
-            if (questionsCount < 10)
+            if (questionsCount < userRequestedQuestions)
             {
-                throw new ApplicationException("The questions count was less than 10! The database must include at least 10 questions!");
+                throw new ApplicationException($"The questions count was less than 10! The database must include at least {userRequestedQuestions} questions!");
             }
             else
             {
@@ -61,12 +64,35 @@ namespace QuizAPI.Repository
                 var questionsList = await connection.QueryAsync<Question>(finalSql);
                 questionsList = questionsList.ToList();
 
+                string questionsListJSON = JsonSerializer.Serialize(questionsList);
+                var activeGameSessionObject = ConstructActiveGameSessionObject(questionsListJSON);
+
+                //Post it to the database 
+                await _activeGameSessionsCommands.InsertActiveGameSession(activeGameSessionObject);
                 //Change it to the ConstructGameSessionObject method
                 return new GameSessionDto();
             }
 
         }
- 
+
+        //This method and its content must be changed! 
+        private static ActiveGameSession ConstructActiveGameSessionObject(string questionsListJSON)
+        {
+            ActiveGameSession activeGameSession = new ActiveGameSession()
+            {
+                UserName = "Test",
+                UserId = 1,
+                Questions = questionsListJSON
+            };
+
+            return activeGameSession;
+        }
+
+        private SQLiteConnection CreateConnection()
+        {
+            return new SQLiteConnection(_connectionString);
+        }
+
         private static string CreateSelectQuestionsSqlStatement(int[] questionIds)
         {
             string convertedIds = "";
@@ -88,18 +114,6 @@ namespace QuizAPI.Repository
 
             string sql = $"Select * from Questions where QuestionId IN {convertedIds}";
             return sql;
-        }
-            
-        private GameSessionDto ConstructGameSessionObject()
-        {
-            //To finish up later
-            return new GameSessionDto();
-        }
-
-
-        private SQLiteConnection CreateConnection()
-        {
-            return new SQLiteConnection(_connectionString);
         }
 
         private static string GenerateRandomTableName()
