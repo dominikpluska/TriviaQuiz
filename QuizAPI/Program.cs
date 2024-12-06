@@ -20,8 +20,10 @@ await context.CreateModel();
 var questionRepository = scope.ServiceProvider.GetRequiredService<IQuestionRepository>();
 var questionCommands = scope.ServiceProvider.GetRequiredService<IQuestionCommands>();
 var gameManager = scope.ServiceProvider.GetRequiredService<IGameManager>();
+var activeGameSession = scope.ServiceProvider.GetRequiredService<IActiveGameSessionsCommands>();
 
-
+//Clear all active game sessions
+await activeGameSession.TruncateActiveGameSession();
 app.MapGet("/", () => "Hello World!");
 
 #region Question Endpoints for Admin Operation

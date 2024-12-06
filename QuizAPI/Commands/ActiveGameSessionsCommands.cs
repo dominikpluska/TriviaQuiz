@@ -28,6 +28,14 @@ namespace QuizAPI.Commands
 
         }
 
+        public async Task<IResult> TruncateActiveGameSession()
+        {
+            using var connection = CreateConnection();
+            var sql = @"DELETE FROM ActiveGameSessions";
+            await connection.ExecuteAsync(sql);
+            return Results.Ok();
+        }
+
         private SQLiteConnection CreateConnection()
         {
             return new SQLiteConnection(_connectionString);

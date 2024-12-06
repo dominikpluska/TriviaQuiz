@@ -5,5 +5,6 @@ namespace QuizAPI.Commands
     public interface IActiveGameSessionsCommands
     {
         public Task<IResult> InsertActiveGameSession(ActiveGameSession activeGameSession);
+        public Task<IResult> TruncateActiveGameSession();
     }
 }
