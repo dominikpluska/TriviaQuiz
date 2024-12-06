@@ -2,6 +2,7 @@
 using QuizAPI.Commands;
 using QuizAPI.Dto;
 using QuizAPI.Models;
+using QuizAPI.Repository;
 using System.Data.SQLite;
 using System.Text.Json;
 
@@ -12,17 +13,26 @@ namespace QuizAPI.GameManager
         private readonly string _connectionString;
         private readonly IConfiguration _configuration;
         private readonly IActiveGameSessionsCommands _activeGameSessionsCommands;
+        private readonly IActiveGameSessionsRepository _activeGameSessionsRepository;
 
-        public GameManager(IConfiguration configuration, IActiveGameSessionsCommands activeGameSessionsCommands)
+        public GameManager(IConfiguration configuration, IActiveGameSessionsCommands activeGameSessionsCommands, IActiveGameSessionsRepository activeGameSessionsRepository)
         {
             _configuration = configuration;
             _activeGameSessionsCommands = activeGameSessionsCommands;
+            _activeGameSessionsRepository = activeGameSessionsRepository;
             _connectionString = _configuration.GetValue<string>("ConnectionStrings:DefaultConnection")!;
         }
 
         public async Task<GameSessionDto> GetGameSession(int userRequestedQuestions = 10)
         {
-            //Check if there is already a Game Session
+            //check for game session
+            var checkForGameSession = await _activeGameSessionsRepository.GetActiveGameSession(1);
+
+            if (checkForGameSession != null)
+            {
+                return checkForGameSession;
+            }
+
             using var connection = CreateConnection();
 
             var sqlCheckCount = "Select count(*) from Questions";
@@ -78,7 +88,7 @@ namespace QuizAPI.GameManager
         //This method and its content must be changed! 
         private static ActiveGameSession ConstructActiveGameSessionObject(string questionsListJSON)
         {
-            ActiveGameSession activeGameSession = new ActiveGameSession()
+            ActiveGameSession activeGameSession = new()
             {
                 UserName = "Test",
                 UserId = 1,

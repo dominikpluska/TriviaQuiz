@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<ApplicationDbContext>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IQuestionCommands, QuestionCommands>();
+builder.Services.AddScoped<IActiveGameSessionsRepository, ActiveGameSessionsRepository>();
 builder.Services.AddScoped<IActiveGameSessionsCommands, ActiveGameSessionsCommands>();
 builder.Services.AddScoped<IGameManager, GameManager>();
 var app = builder.Build();
