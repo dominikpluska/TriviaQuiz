@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Microsoft.Extensions.Configuration;
 using QuizAPI.Dto;
+using QuizAPI.HelperMethods;
 using QuizAPI.Models;
 using System.Data.SQLite;
 
@@ -19,7 +20,7 @@ namespace QuizAPI.Repository
 
         public async Task<GameSessionDto> GetActiveGameSession(int id)
         {
-            using var connection = CreateConnection();
+            using var connection = SqlConnection.CreateConnection(_connectionString);
             var sql = @$"SELECT GameSessionId, UserId, UserName, SessionTime 
                          FROM ActiveGameSessions WHERE UserId = {id}";
             var resutls = await connection.QueryFirstOrDefaultAsync<GameSessionDto>(sql);
@@ -27,9 +28,5 @@ namespace QuizAPI.Repository
             return resutls;
         }
 
-        private SQLiteConnection CreateConnection()
-        {
-            return new SQLiteConnection(_connectionString);
-        }
     }
 }

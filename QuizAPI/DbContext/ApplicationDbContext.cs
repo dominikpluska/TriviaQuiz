@@ -3,6 +3,7 @@ using System.Data.SQLite;
 using System.Data;
 using Dapper;
 using QuizAPI.Models;
+using QuizAPI.HelperMethods;
 
 namespace QuizAPI.DbContext
 {
@@ -15,11 +16,6 @@ namespace QuizAPI.DbContext
         {
             _configuration = configuration;
             _connectionString = _configuration.GetValue<string>("ConnectionStrings:DefaultConnection")!;
-        }
-
-        public IDbConnection CreateConnection()
-        {
-            return new SQLiteConnection(_connectionString);
         }
 
         public async Task CreateModel()
@@ -35,7 +31,7 @@ namespace QuizAPI.DbContext
 
         private async Task SeedTables()
         {
-            using var connection = CreateConnection();
+            using var connection = SqlConnection.CreateConnection(_connectionString);
 
             var sql_check = @"select count(*) from Questions";
             var check_result =  await connection.ExecuteScalarAsync<int>(sql_check);
@@ -79,7 +75,7 @@ namespace QuizAPI.DbContext
 
         private async Task CreateTables()
         {
-            using var connection = CreateConnection();
+            using var connection = SqlConnection.CreateConnection(_connectionString);
             var sql = @"
                 CREATE TABLE IF NOT EXISTS 
                 Questions (

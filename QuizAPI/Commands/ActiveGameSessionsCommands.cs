@@ -21,10 +21,9 @@ namespace QuizAPI.Commands
             var sql = @"INSERT INTO ActiveGameSessions (
                                     GameSessionId, UserId, UserName,Questions, SessionTime) 
                                     VALUES 
-                                    (@GameSessionId, @UserId, @UserName, @Questions, @SessionTime);
-                                    ";
-            await connection.ExecuteAsync(sql, activeGameSession);
-            return Results.Ok("A new game session has been created!");
+                                    (@GameSessionId, @UserId, @UserName, @Questions, @SessionTime);";
+            var result = await connection.ExecuteAsync(sql, activeGameSession);
+            return Results.Ok(result);
 
         }
 
@@ -32,6 +31,14 @@ namespace QuizAPI.Commands
         {
             using var connection = CreateConnection();
             var sql = @"DELETE FROM ActiveGameSessions";
+            await connection.ExecuteAsync(sql);
+            return Results.Ok();
+        }
+
+        public async Task<IResult> RemoveGameSession(string activeGameSessionId)
+        {
+            using var connection = CreateConnection();
+            var sql = @$"DELETE FROM ActiveGameSessions where GameSessionId = {activeGameSessionId}";
             await connection.ExecuteAsync(sql);
             return Results.Ok();
         }

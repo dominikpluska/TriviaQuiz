@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using QuizAPI.Commands;
 using QuizAPI.Dto;
+using QuizAPI.HelperMethods;
 using QuizAPI.Models;
 using QuizAPI.Repository;
 using System.Data.SQLite;
@@ -33,14 +34,14 @@ namespace QuizAPI.GameManager
                 return checkForGameSession;
             }
 
-            using var connection = CreateConnection();
+            using var connection = SqlConnection.CreateConnection(_connectionString);
 
             var sqlCheckCount = "Select count(*) from Questions";
             int questionsCount = await connection.ExecuteScalarAsync<int>(sqlCheckCount);
 
             if (questionsCount < userRequestedQuestions)
             {
-                throw new ApplicationException($"The questions count was less than 10! The database must include at least {userRequestedQuestions} questions!");
+                throw new ApplicationException($"The questions count was less than {userRequestedQuestions}! The database must include at least {userRequestedQuestions} questions!");
             }
             else
             {
@@ -78,9 +79,9 @@ namespace QuizAPI.GameManager
                 var activeGameSessionObject = ConstructActiveGameSessionObject(questionsListJSON);
 
                 //Post it to the database 
-                await _activeGameSessionsCommands.InsertActiveGameSession(activeGameSessionObject);
-                //Change it to the ConstructGameSessionObject method
-                return new GameSessionDto();
+                var result = await _activeGameSessionsCommands.InsertActiveGameSession(activeGameSessionObject);
+
+                return CreateGameSessionDto(activeGameSessionObject);
             }
 
         }
@@ -96,11 +97,6 @@ namespace QuizAPI.GameManager
             };
 
             return activeGameSession;
-        }
-
-        private SQLiteConnection CreateConnection()
-        {
-            return new SQLiteConnection(_connectionString);
         }
 
         private static string CreateSelectQuestionsSqlStatement(int[] questionIds)
@@ -154,6 +150,19 @@ namespace QuizAPI.GameManager
 
             }
             return randomIds;
+        }
+
+        private static GameSessionDto CreateGameSessionDto(ActiveGameSession activeGameSession)
+        {
+            GameSessionDto gameSessionDto = new()
+            {
+                GameSessionId = activeGameSession.GameSessionId,
+                UserId = activeGameSession.UserId,
+                UserName = activeGameSession.UserName,
+                SessionTime = activeGameSession.SessionTime,
+            };
+
+            return gameSessionDto;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using QuizAPI.Dto;
+using QuizAPI.HelperMethods;
 using QuizAPI.Models;
 using System;
 using System.Data;
@@ -21,7 +22,7 @@ namespace QuizAPI.Repository
 
         public async Task<IEnumerable<Question>> GetAllQuestions()
         {
-            using var connection = CreateConnection();
+            using var connection = SqlConnection.CreateConnection(_connectionString);
 
             var sql = @"SELECT * FROM Questions";
 
@@ -32,16 +33,11 @@ namespace QuizAPI.Repository
 
         public async Task<Question> GetQuestion(int id)
         {
-            using var connection = CreateConnection();
+            using var connection = SqlConnection.CreateConnection(_connectionString);
             var sql = @$"SELECT * FROM Questions WHERE QuestionId = {id}";
             var resutls = await connection.QuerySingleAsync<Question>(sql);
 
             return resutls;
-        }
-
-        private SQLiteConnection CreateConnection()
-        {
-            return new SQLiteConnection(_connectionString);
         }
     }
 }

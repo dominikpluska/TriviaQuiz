@@ -3,6 +3,7 @@ using QuizAPI.Models;
 using System.Data;
 using System.Data.SQLite;
 using Microsoft.AspNetCore.Http;
+using QuizAPI.HelperMethods;
 
 namespace QuizAPI.Commands
 {
@@ -19,7 +20,7 @@ namespace QuizAPI.Commands
 
         public async Task<IResult> Delete(int questionId)
         {
-            using var connection = CreateConnection();
+            using var connection = SqlConnection.CreateConnection(_connectionString);
 
             var sqlCheckIfExist = $@"Select Count(*) from Questions where QuestionId = {questionId}";
             int entity = await connection.ExecuteScalarAsync<int>(sqlCheckIfExist);
@@ -43,7 +44,7 @@ namespace QuizAPI.Commands
 
         public async Task<IResult> Insert(Question question)
         {
-            using var connection = CreateConnection();
+            using var connection = SqlConnection.CreateConnection(_connectionString);
             var sql = @"INSERT INTO Questions (
                                     QuestionTitle, QuestionDescription, QuestionCategory,
                                     OptionA, OptionB, OptionC, OptionD, CorrectAnswer, QuestionScore) 
@@ -58,7 +59,7 @@ namespace QuizAPI.Commands
 
         public async Task<IResult> Update(Question question)
         {
-            using var connection = CreateConnection();
+            using var connection = SqlConnection.CreateConnection(_connectionString);
 
             var sql = $@"UPDATE Questions set QuestionTitle = (@QuestionTitle), QuestionDescription = (@QuestionDescription), QuestionCategory = (@QuestionCategory),
                         OptionA = (@OptionA), OptionB = (@OptionB), OptionC = (@OptionC), OptionD = (@OptionD), CorrectAnswer = (@CorrectAnswer), QuestionScore = @QuestionScore 
@@ -69,9 +70,5 @@ namespace QuizAPI.Commands
             return Results.Ok("Record has been updated!");
         }
 
-        private IDbConnection CreateConnection()
-        {
-            return new SQLiteConnection(_connectionString);
-        }
     }
 }
