@@ -7,5 +7,6 @@ namespace QuizAPI.GameManager
         public Task<GameSessionDto> GetGameSession(int userRequestedQuestions = 10);
 
         public Task<QuestionDto> GetNextQuestion(string guid);
+        public Task<string> CheckCorrectAnswer(AnswerDto answerDto);
     }
 }

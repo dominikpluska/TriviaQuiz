@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Microsoft.AspNetCore.Components;
 using QuizAPI.Commands;
 using QuizAPI.Dto;
 using QuizAPI.HelperMethods;
@@ -12,13 +13,14 @@ namespace QuizAPI.GameManager
     public class GameManager : IGameManager
     {
         private readonly string _connectionString;
+        private readonly int allowedActiveGameSessions;
         private readonly IConfiguration _configuration;
         private readonly IActiveGameSessionsCommands _activeGameSessionsCommands;
         private readonly IActiveGameSessionsRepository _activeGameSessionsRepository;
         private readonly ITempGameSessionCommands _tempGameSessionCommands;
         private readonly ITempGameSessionRepository _tempGameSessionRepository;
 
-        private int allowedActiveGameSessions = 20;
+
 
         public GameManager(IConfiguration configuration, IActiveGameSessionsCommands activeGameSessionsCommands, IActiveGameSessionsRepository activeGameSessionsRepository,
                            ITempGameSessionCommands tempGameSessionCommands, ITempGameSessionRepository tempGameSessionRepository)
@@ -28,6 +30,7 @@ namespace QuizAPI.GameManager
             _activeGameSessionsRepository = activeGameSessionsRepository;
             _tempGameSessionCommands = tempGameSessionCommands;
             _tempGameSessionRepository = tempGameSessionRepository;
+            allowedActiveGameSessions = _configuration.GetValue<int>("GeneralSettings:NumberOfConnectionsAllowed")!;
             _connectionString = _configuration.GetValue<string>("ConnectionStrings:DefaultConnection")!;
         }
 
@@ -37,12 +40,12 @@ namespace QuizAPI.GameManager
             using var connection = SqlConnection.CreateConnection(_connectionString);
             var sql = @$"SELECT QuestionId 
                             FROM '{guid}'
-                            WHERE QuestionScore = 5
+                            WHERE QuestionScore = 5 AND WasAnswerCorrect IS NULL
                             AND (SELECT COUNT(*) FROM Questions WHERE QuestionScore = 5) > 0
                             UNION ALL
                             SELECT QuestionId 
                             FROM '{guid}'
-                            WHERE QuestionScore = 10
+                            WHERE QuestionScore = 10 AND WasAnswerCorrect IS NULL
                             AND (SELECT COUNT(*) FROM Questions WHERE QuestionScore = 5) = 0;";
 
             var executeCommand = await connection.QueryAsync<int>(sql);
@@ -127,7 +130,6 @@ namespace QuizAPI.GameManager
                 var questionsList = await connection.QueryAsync<Question>(finalSql);
                 IEnumerable <Question> questionsListx2 = questionsList.ToList();
 
-                string questionsListJSON = JsonSerializer.Serialize(questionsList);
                 var activeGameSessionObject = ConstructActiveGameSessionObject();
 
                 //Post it to the database 
@@ -141,6 +143,26 @@ namespace QuizAPI.GameManager
                 return CreateGameSessionDto(activeGameSessionObject);
             }
 
+        }
+
+        //Update this method!
+        public async Task<string> CheckCorrectAnswer(AnswerDto answerDto)
+        {
+            //Check if the answer was correct
+            string answer = await _tempGameSessionRepository.FindCorrectAnswer(answerDto.Guid, answerDto.QuestionId);
+
+            if (answer == answerDto.Answer)
+            {
+                //Mark answer as correct in the database
+                await _tempGameSessionCommands.PostAnswer(answerDto.Guid, answerDto.QuestionId, 1);
+                return "Correct";
+            }
+            else
+            {
+                //Mark answer as incorrect in the database
+                await _tempGameSessionCommands.PostAnswer(answerDto.Guid, answerDto.QuestionId, 0);
+                return "Incorrect";
+            }
         }
 
         //This method and its content must be changed! 

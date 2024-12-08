@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.AspNetCore.Http.HttpResults;
+using QuizAPI.Dto;
 using QuizAPI.HelperMethods;
 using QuizAPI.Models;
 using System;
@@ -30,7 +31,8 @@ namespace QuizAPI.Commands
                             OptionC TEXT NOT NULL,
                             OptionD TEXT NOT NULL,
                             CorrectAnswer TEXT NOT NULL,
-                            QuestionScore INTEGER NOT NULL)
+                            QuestionScore INTEGER NOT NULL,
+                            WasAnswerCorrect INTEGER DEFAULT NULL)
                             ";
             await connection.ExecuteAsync(sql);
             return Results.Ok($"Temp table {guid} has been created!");
@@ -49,19 +51,6 @@ namespace QuizAPI.Commands
                                     ";
             await connection.ExecuteAsync(sql, questions);
             return Results.Ok($"Questions have been seeded!");
-        }
-
-        public async Task<IResult> DeleteTopQuestion(string guid)
-        {
-            using var connection = SqlConnection.CreateConnection(_connectionString);
-            var sql = $@"DELETE FROM {guid} where QuestionId IN
-                        (
-                            Select QuestionId from '{guid}' LIMIT 1;
-                        )";
-
-            await connection.ExecuteAsync(sql);
-            return Results.Ok($"Question removed!");
-
         }
 
         public async Task<IResult> DropTempTable(string guid)
@@ -95,5 +84,15 @@ namespace QuizAPI.Commands
             }
 
         }
+
+        public async Task<IResult> PostAnswer(string guid,int questionId ,int wasCorrect)
+        {
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+            var sql = @$"UPDATE '{guid}'SET WasAnswerCorrect ={wasCorrect}
+                            WHERE QuestionId = {questionId}";
+            await connection.ExecuteAsync(sql);
+            return Results.Ok("Table updated!");
+        }
+
     }
 }

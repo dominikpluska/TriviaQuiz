@@ -1,5 +1,6 @@
 using QuizAPI.Commands;
 using QuizAPI.DbContext;
+using QuizAPI.Dto;
 using QuizAPI.GameManager;
 using QuizAPI.Models;
 using QuizAPI.Repository;
@@ -24,7 +25,6 @@ var questionCommands = scope.ServiceProvider.GetRequiredService<IQuestionCommand
 var gameManager = scope.ServiceProvider.GetRequiredService<IGameManager>();
 var activeGameSession = scope.ServiceProvider.GetRequiredService<IActiveGameSessionsCommands>();
 var tempGameSessionCommands = scope.ServiceProvider.GetRequiredService<ITempGameSessionCommands>();
-var tempGameSessionRepository = scope.ServiceProvider.GetRequiredService<ITempGameSessionRepository>();
 
 //Clear all temp game tables
 await tempGameSessionCommands.DropTempTables();
@@ -44,6 +44,7 @@ app.MapDelete("/DeleteQuestion/{id}", async (int id) => await questionCommands.D
 //how many questions there are left / what is the score etc. in memory. At the end the result is saved to the database.
 app.MapGet("/GetGameSession", async () => await gameManager.GetGameSession());
 app.MapGet("/GetRandomQuestion/{guid}", async (string guid) => await gameManager.GetNextQuestion(guid));
+app.MapPost("/CheckCorrectAnswer", async(AnswerDto answerDto) => { await gameManager.CheckCorrectAnswer(answerDto); });
 #endregion
 
 app.Run();
