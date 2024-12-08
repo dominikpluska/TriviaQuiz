@@ -10,6 +10,8 @@ builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IQuestionCommands, QuestionCommands>();
 builder.Services.AddScoped<IActiveGameSessionsRepository, ActiveGameSessionsRepository>();
 builder.Services.AddScoped<IActiveGameSessionsCommands, ActiveGameSessionsCommands>();
+builder.Services.AddScoped<ITempGameSessionCommands, TempGameSessionCommands>();
+builder.Services.AddScoped<ITempGameSessionRepository, TempGameSessionRepository>();
 builder.Services.AddScoped<IGameManager, GameManager>();
 var app = builder.Build();
 
@@ -21,7 +23,11 @@ var questionRepository = scope.ServiceProvider.GetRequiredService<IQuestionRepos
 var questionCommands = scope.ServiceProvider.GetRequiredService<IQuestionCommands>();
 var gameManager = scope.ServiceProvider.GetRequiredService<IGameManager>();
 var activeGameSession = scope.ServiceProvider.GetRequiredService<IActiveGameSessionsCommands>();
+var tempGameSessionCommands = scope.ServiceProvider.GetRequiredService<ITempGameSessionCommands>();
+var tempGameSessionRepository = scope.ServiceProvider.GetRequiredService<ITempGameSessionRepository>();
 
+//Clear all temp game tables
+await tempGameSessionCommands.DropTempTables();
 //Clear all active game sessions
 await activeGameSession.TruncateActiveGameSession();
 app.MapGet("/", () => "Hello World!");
@@ -37,6 +43,7 @@ app.MapDelete("/DeleteQuestion/{id}", async (int id) => await questionCommands.D
 //User request a game session with a valid session string / id. Then the game is returned to the user. The rest is handled by a game manager which is going to keep track of 
 //how many questions there are left / what is the score etc. in memory. At the end the result is saved to the database.
 app.MapGet("/GetGameSession", async () => await gameManager.GetGameSession());
+app.MapGet("/GetRandomQuestion/{guid}", async (string guid) => await gameManager.GetNextQuestion(guid));
 #endregion
 
 app.Run();

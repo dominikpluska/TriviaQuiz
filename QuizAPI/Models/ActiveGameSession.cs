@@ -10,8 +10,6 @@ namespace QuizAPI.Models
         public int UserId { get; set; }
         [Required]
         public string UserName { get; set; }
-        [Required]
-        public string Questions { get; set; }
         public string SessionTime { get; set; } = DateTime.Now.ToString();
     }
 }

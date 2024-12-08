@@ -19,9 +19,9 @@ namespace QuizAPI.Commands
         {
             using var connection = CreateConnection();
             var sql = @"INSERT INTO ActiveGameSessions (
-                                    GameSessionId, UserId, UserName,Questions, SessionTime) 
+                                    GameSessionId, UserId, UserName, SessionTime) 
                                     VALUES 
-                                    (@GameSessionId, @UserId, @UserName, @Questions, @SessionTime);";
+                                    (@GameSessionId, @UserId, @UserName, @SessionTime);";
             var result = await connection.ExecuteAsync(sql, activeGameSession);
             return Results.Ok(result);
 

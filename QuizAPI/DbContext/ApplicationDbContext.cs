@@ -79,7 +79,7 @@ namespace QuizAPI.DbContext
             var sql = @"
                 CREATE TABLE IF NOT EXISTS 
                 Questions (
-                    QuestionId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                    QuestionId INTEGER NOT NULL PRIMARY KEY,
                     QuestionTitle TEXT NOT NULL,
                     QuestionDescription TEXT NOT NULL,
                     QuestionCategory TEXT NOT NULL,
@@ -102,7 +102,6 @@ namespace QuizAPI.DbContext
                     GameSessionId TEXT NOT NULL UNIQUE,
                     UserId INT NOT NULL, 
                     UserName TEXT NOT NULL,
-                    Questions TEXT NOT NULL,
                     SessionTime TEXT NOT NULL
                 );
                CREATE TABLE IF NOT EXISTS 

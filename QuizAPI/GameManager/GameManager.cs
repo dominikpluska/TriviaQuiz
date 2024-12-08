@@ -15,17 +15,69 @@ namespace QuizAPI.GameManager
         private readonly IConfiguration _configuration;
         private readonly IActiveGameSessionsCommands _activeGameSessionsCommands;
         private readonly IActiveGameSessionsRepository _activeGameSessionsRepository;
+        private readonly ITempGameSessionCommands _tempGameSessionCommands;
+        private readonly ITempGameSessionRepository _tempGameSessionRepository;
 
-        public GameManager(IConfiguration configuration, IActiveGameSessionsCommands activeGameSessionsCommands, IActiveGameSessionsRepository activeGameSessionsRepository)
+        private int allowedActiveGameSessions = 20;
+
+        public GameManager(IConfiguration configuration, IActiveGameSessionsCommands activeGameSessionsCommands, IActiveGameSessionsRepository activeGameSessionsRepository,
+                           ITempGameSessionCommands tempGameSessionCommands, ITempGameSessionRepository tempGameSessionRepository)
         {
             _configuration = configuration;
             _activeGameSessionsCommands = activeGameSessionsCommands;
             _activeGameSessionsRepository = activeGameSessionsRepository;
+            _tempGameSessionCommands = tempGameSessionCommands;
+            _tempGameSessionRepository = tempGameSessionRepository;
             _connectionString = _configuration.GetValue<string>("ConnectionStrings:DefaultConnection")!;
+        }
+
+        public async Task<QuestionDto> GetNextQuestion(string guid)
+        {
+            //The function should also have a way to check if the user can request the question. To be planned
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+            var sql = @$"SELECT QuestionId 
+                            FROM '{guid}'
+                            WHERE QuestionScore = 5
+                            AND (SELECT COUNT(*) FROM Questions WHERE QuestionScore = 5) > 0
+                            UNION ALL
+                            SELECT QuestionId 
+                            FROM '{guid}'
+                            WHERE QuestionScore = 10
+                            AND (SELECT COUNT(*) FROM Questions WHERE QuestionScore = 5) = 0;";
+
+            var executeCommand = await connection.QueryAsync<int>(sql);
+            var questionIds = executeCommand.ToArray();
+
+
+            if (questionIds.Length > 0)
+            {
+                Random random = new();
+                int index = random.Next(0, questionIds.Length - 1);
+
+                var getQuestion = await _tempGameSessionRepository.GetQuestion(guid, questionIds[index]);
+                return getQuestion;
+            }
+
+            else
+            {
+                return null;
+            }
         }
 
         public async Task<GameSessionDto> GetGameSession(int userRequestedQuestions = 10)
         {
+            //check if a there are available spots
+            int activeGameSessionsCount = await _activeGameSessionsRepository.GetActiveGameSessionCount();
+
+            if(activeGameSessionsCount >= allowedActiveGameSessions)
+            {
+                return new GameSessionDto()
+                {
+                    GameSessionId = $"There is already {allowedActiveGameSessions} active game sessions! Please try again later!",
+                    UserName = "NotAllowerd",
+                };
+            }
+
             //check for game session
             var checkForGameSession = await _activeGameSessionsRepository.GetActiveGameSession(1);
 
@@ -34,8 +86,8 @@ namespace QuizAPI.GameManager
                 return checkForGameSession;
             }
 
+            //Establish connection to the sqlite database and check if the question count matches what has been requested
             using var connection = SqlConnection.CreateConnection(_connectionString);
-
             var sqlCheckCount = "Select count(*) from Questions";
             int questionsCount = await connection.ExecuteScalarAsync<int>(sqlCheckCount);
 
@@ -73,13 +125,18 @@ namespace QuizAPI.GameManager
 
                 string finalSql = CreateSelectQuestionsSqlStatement(questionIdsList);
                 var questionsList = await connection.QueryAsync<Question>(finalSql);
-                questionsList = questionsList.ToList();
+                IEnumerable <Question> questionsListx2 = questionsList.ToList();
 
                 string questionsListJSON = JsonSerializer.Serialize(questionsList);
-                var activeGameSessionObject = ConstructActiveGameSessionObject(questionsListJSON);
+                var activeGameSessionObject = ConstructActiveGameSessionObject();
 
                 //Post it to the database 
                 var result = await _activeGameSessionsCommands.InsertActiveGameSession(activeGameSessionObject);
+
+                //Create temp table and insert objects
+                await _tempGameSessionCommands.CreateTempTable(activeGameSessionObject.GameSessionId);
+                await _tempGameSessionCommands.InsertQuestions(questionsListx2, activeGameSessionObject.GameSessionId);
+
 
                 return CreateGameSessionDto(activeGameSessionObject);
             }
@@ -87,13 +144,12 @@ namespace QuizAPI.GameManager
         }
 
         //This method and its content must be changed! 
-        private static ActiveGameSession ConstructActiveGameSessionObject(string questionsListJSON)
+        private static ActiveGameSession ConstructActiveGameSessionObject()
         {
             ActiveGameSession activeGameSession = new()
             {
                 UserName = "Test",
                 UserId = 1,
-                Questions = questionsListJSON
             };
 
             return activeGameSession;

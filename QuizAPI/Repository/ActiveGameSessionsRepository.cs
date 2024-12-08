@@ -28,5 +28,14 @@ namespace QuizAPI.Repository
             return resutls;
         }
 
+        public async Task<int> GetActiveGameSessionCount()
+        {
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+            var sql = @$"SELECT Count(*) FROM ActiveGameSessions";
+            var resutls = await connection.ExecuteScalarAsync<int>(sql);
+
+            return resutls;
+        }
+
     }
 }

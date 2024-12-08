@@ -6,13 +6,13 @@ namespace QuizAPI.Dto
     public class QuestionDto
     {
         public int QuestionId { get; set; }
-        public required string QuestionTitle { get; set; }
-        public required string QuestionDescription { get; set; }
-        public required string QuestionCategory { get; set; }
-        public required string OptionA { get; set; }
-        public required string OptionB { get; set; }
-        public required string OptionC { get; set; }
-        public required string OptionD { get; set; }
-        public required int QuestionScore { get; set; }
+        public string QuestionTitle { get; set; }
+        public string QuestionDescription { get; set; }
+        public string QuestionCategory { get; set; }
+        public string OptionA { get; set; }
+        public string OptionB { get; set; }
+        public string OptionC { get; set; }
+        public string OptionD { get; set; }
+        public int QuestionScore { get; set; }
     }
 }
