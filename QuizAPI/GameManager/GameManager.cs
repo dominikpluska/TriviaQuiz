@@ -19,10 +19,12 @@ namespace QuizAPI.GameManager
         private readonly IActiveGameSessionsRepository _activeGameSessionsRepository;
         private readonly ITempGameSessionCommands _tempGameSessionCommands;
         private readonly ITempGameSessionRepository _tempGameSessionRepository;
+        private readonly IQuestionRepository _questionRepository;
         private readonly ICashedGameSessions _cashedGameSessions;
 
         public GameManager(IConfiguration configuration, IActiveGameSessionsCommands activeGameSessionsCommands, IActiveGameSessionsRepository activeGameSessionsRepository,
-                           ITempGameSessionCommands tempGameSessionCommands, ITempGameSessionRepository tempGameSessionRepository, ICashedGameSessions cashedGameSessions)
+                           ITempGameSessionCommands tempGameSessionCommands, ITempGameSessionRepository tempGameSessionRepository, ICashedGameSessions cashedGameSessions,
+                           IQuestionRepository questionRepository)
         {
             _configuration = configuration;
             _activeGameSessionsCommands = activeGameSessionsCommands;
@@ -30,6 +32,7 @@ namespace QuizAPI.GameManager
             _tempGameSessionCommands = tempGameSessionCommands;
             _tempGameSessionRepository = tempGameSessionRepository;
             _cashedGameSessions = cashedGameSessions;
+            _questionRepository = questionRepository;
             allowedActiveGameSessions = _configuration.GetValue<int>("GeneralSettings:NumberOfConnectionsAllowed")!;
             _connectionString = _configuration.GetValue<string>("ConnectionStrings:DefaultConnection")!;
         }
@@ -79,8 +82,8 @@ namespace QuizAPI.GameManager
 
             //Establish connection to the sqlite database and check if the question count matches what has been requested
             using var connection = SqlConnection.CreateConnection(_connectionString);
-            var sqlCheckCount = "Select count(*) from Questions";
-            int questionsCount = await connection.ExecuteScalarAsync<int>(sqlCheckCount);
+
+            int questionsCount = await _questionRepository.GetQuestionCount();
 
             if (questionsCount < userRequestedQuestions)
             {
@@ -103,13 +106,16 @@ namespace QuizAPI.GameManager
 
                 var questionsOfDifferentScoreCount = await connection.QuerySingleOrDefaultAsync<QuestionsCount>(howManyQuestionsToSelect);
 
-                var getLowScoreIdsSql = "Select QuestionId  from Questions where QuestionScore = 5";
-                var lowScoreIds = await connection.QueryAsync<int>(getLowScoreIdsSql);
-                IEnumerable<int> LowScoreQuestions = GenerateRandomTable(lowScoreIds.ToArray(), questionsOfDifferentScoreCount!.LowerScorePercentage);
+                var getLowScoreIdsSql = await _questionRepository.GetQuestion5Score();
+
+                //var getLowScoreIdsSql = "Select QuestionId  from Questions where QuestionScore = 5";
+               // var lowScoreIds = await connection.QueryAsync<int>(getLowScoreIdsSql);
+                IEnumerable<int> LowScoreQuestions = GenerateRandomTable(getLowScoreIdsSql.ToArray(), questionsOfDifferentScoreCount!.LowerScorePercentage);
 
 
-                var getHighScoreIdsSql = "Select QuestionId  from Questions where QuestionScore = 10";
-                var highScoreIds = await connection.QueryAsync<int>(getHighScoreIdsSql);
+                var highScoreIds = await _questionRepository.GetQuestion10Score();
+                //var getHighScoreIdsSql = "Select QuestionId  from Questions where QuestionScore = 10";
+                //var highScoreIds = await connection.QueryAsync<int>(getHighScoreIdsSql);
                 IEnumerable<int> HighScoreQuestions = GenerateRandomTable(highScoreIds.ToArray(), questionsOfDifferentScoreCount!.HigherScorePercentage);
 
                 var questionIdsList = LowScoreQuestions.Concat(HighScoreQuestions).ToArray();

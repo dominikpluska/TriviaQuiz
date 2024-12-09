@@ -39,5 +39,26 @@ namespace QuizAPI.Repository
 
             return resutls;
         }
+
+        public async Task<int> GetQuestionCount()
+        {
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+            var sqlCheckCount = "Select count(*) from Questions";
+            return await connection.ExecuteScalarAsync<int>(sqlCheckCount);
+        }
+
+        public async Task<IEnumerable<int>> GetQuestion5Score()
+        {
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+            var getLowScoreIdsSql = "Select QuestionId  from Questions where QuestionScore = 5";
+            return await connection.QueryAsync<int>(getLowScoreIdsSql);
+        }
+
+        public async Task<IEnumerable<int>> GetQuestion10Score()
+        {
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+            var getLowScoreIdsSql = "Select QuestionId  from Questions where QuestionScore = 10";
+            return await connection.QueryAsync<int>(getLowScoreIdsSql);
+        }
     }
 }
