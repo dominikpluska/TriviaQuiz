@@ -1,7 +1,10 @@
 ﻿using Dapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Configuration;
 using QuizAPI.Dto;
 using QuizAPI.HelperMethods;
+using QuizAPI.Models;
+using System;
 
 namespace QuizAPI.Repository
 {
@@ -36,6 +39,15 @@ namespace QuizAPI.Repository
             var sql = $@"Select CorrectAnswer FROM '{guid}' where QuestionId = {questionId}";
             var result = await connection.QueryAsync<string>(sql);
             return result.FirstOrDefault();
+        }
+
+        public async Task<IEnumerable<QuestionsCaching>> GetAll(string guid)
+        {
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+            var sql = $@"Select * FROM '{guid}'";
+            var result = await connection.QueryAsync<QuestionsCaching>(sql);
+
+            return result.ToList();
         }
     }
 }

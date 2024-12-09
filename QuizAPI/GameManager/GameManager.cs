@@ -19,50 +19,38 @@ namespace QuizAPI.GameManager
         private readonly IActiveGameSessionsRepository _activeGameSessionsRepository;
         private readonly ITempGameSessionCommands _tempGameSessionCommands;
         private readonly ITempGameSessionRepository _tempGameSessionRepository;
-
-
+        private readonly ICashedGameSessions _cashedGameSessions;
 
         public GameManager(IConfiguration configuration, IActiveGameSessionsCommands activeGameSessionsCommands, IActiveGameSessionsRepository activeGameSessionsRepository,
-                           ITempGameSessionCommands tempGameSessionCommands, ITempGameSessionRepository tempGameSessionRepository)
+                           ITempGameSessionCommands tempGameSessionCommands, ITempGameSessionRepository tempGameSessionRepository, ICashedGameSessions cashedGameSessions)
         {
             _configuration = configuration;
             _activeGameSessionsCommands = activeGameSessionsCommands;
             _activeGameSessionsRepository = activeGameSessionsRepository;
             _tempGameSessionCommands = tempGameSessionCommands;
             _tempGameSessionRepository = tempGameSessionRepository;
+            _cashedGameSessions = cashedGameSessions;
             allowedActiveGameSessions = _configuration.GetValue<int>("GeneralSettings:NumberOfConnectionsAllowed")!;
             _connectionString = _configuration.GetValue<string>("ConnectionStrings:DefaultConnection")!;
         }
 
         public async Task<QuestionDto> GetNextQuestion(string guid)
         {
-            //The function should also have a way to check if the user can request the question. To be planned
-            using var connection = SqlConnection.CreateConnection(_connectionString);
-            var sql = @$"SELECT QuestionId 
-                            FROM '{guid}'
-                            WHERE QuestionScore = 5 AND WasAnswerCorrect IS NULL
-                            AND (SELECT COUNT(*) FROM Questions WHERE QuestionScore = 5) > 0
-                            UNION ALL
-                            SELECT QuestionId 
-                            FROM '{guid}'
-                            WHERE QuestionScore = 10 AND WasAnswerCorrect IS NULL
-                            AND (SELECT COUNT(*) FROM Questions WHERE QuestionScore = 5) = 0;";
+            var questionIds = await _activeGameSessionsRepository.GetActiveQuestions(guid);
+            var questionIdsToArray = questionIds.ToArray();
 
-            var executeCommand = await connection.QueryAsync<int>(sql);
-            var questionIds = executeCommand.ToArray();
-
-
-            if (questionIds.Length > 0)
+            if (questionIdsToArray.Length > 0)
             {
                 Random random = new();
-                int index = random.Next(0, questionIds.Length - 1);
+                int index = random.Next(0, questionIdsToArray.Length - 1);
 
-                var getQuestion = await _tempGameSessionRepository.GetQuestion(guid, questionIds[index]);
+                var getQuestion = await _tempGameSessionRepository.GetQuestion(guid, questionIdsToArray[index]);
                 return getQuestion;
             }
 
             else
             {
+                await CloseGameSession(guid);
                 return null;
             }
         }
@@ -165,6 +153,31 @@ namespace QuizAPI.GameManager
             }
         }
 
+        public async Task CloseGameSession(string guid)
+        {
+            //Get Game Session's Current Open Table 
+            IEnumerable<QuestionsCaching> questionsToCache = await _tempGameSessionRepository.GetAll(guid);
+            string questionsToCacheJson = JsonSerializer.Serialize(questionsToCache);
+
+            //Get current game session
+            GameSessionDto activeGameSession = await _activeGameSessionsRepository.GetActiveGameSession(guid);
+
+            CachedGameSessionModel cachedGameSessionModel = new()
+            {
+                GameSessionId = guid,
+                UserId = activeGameSession.UserId, 
+                UserName = activeGameSession.UserName, 
+                questions = questionsToCacheJson,
+                SessionTime = activeGameSession.SessionTime,
+            };
+
+            //Insert it to the cached table
+            await _cashedGameSessions.Insert(cachedGameSessionModel);
+
+            //Drop Active game session and the temp table after caching
+            await _activeGameSessionsCommands.RemoveGameSession(guid);
+        }
+
         //This method and its content must be changed! 
         private static ActiveGameSession ConstructActiveGameSessionObject()
         {
@@ -242,5 +255,6 @@ namespace QuizAPI.GameManager
 
             return gameSessionDto;
         }
+
     }
 }

@@ -13,6 +13,7 @@ builder.Services.AddScoped<IActiveGameSessionsRepository, ActiveGameSessionsRepo
 builder.Services.AddScoped<IActiveGameSessionsCommands, ActiveGameSessionsCommands>();
 builder.Services.AddScoped<ITempGameSessionCommands, TempGameSessionCommands>();
 builder.Services.AddScoped<ITempGameSessionRepository, TempGameSessionRepository>();
+builder.Services.AddScoped<ICashedGameSessions, CashedGameSessions>();
 builder.Services.AddScoped<IGameManager, GameManager>();
 var app = builder.Build();
 

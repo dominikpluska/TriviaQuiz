@@ -105,7 +105,7 @@ namespace QuizAPI.DbContext
                     SessionTime TEXT NOT NULL
                 );
                CREATE TABLE IF NOT EXISTS 
-               DeactivatedGameSessions(
+               CashedGameSessions(
                     GameSessionId TEXT NOT NULL UNIQUE,
                     UserId INT NOT NULL, 
                     UserName TEXT NOT NULL,
