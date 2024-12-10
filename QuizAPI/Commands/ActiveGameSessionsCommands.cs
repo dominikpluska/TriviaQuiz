@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using QuizAPI.HelperMethods;
 using QuizAPI.Models;
 using System.Data.SQLite;
 
@@ -17,7 +18,7 @@ namespace QuizAPI.Commands
 
         public async Task<IResult> InsertActiveGameSession(ActiveGameSession activeGameSession)
         {
-            using var connection = CreateConnection();
+            using var connection = SqlConnection.CreateConnection(_connectionString);
             var sql = @"INSERT INTO ActiveGameSessions (
                                     GameSessionId, UserId, UserName, SessionTime) 
                                     VALUES 
@@ -29,7 +30,7 @@ namespace QuizAPI.Commands
 
         public async Task<IResult> TruncateActiveGameSession()
         {
-            using var connection = CreateConnection();
+            using var connection = SqlConnection.CreateConnection(_connectionString);
             var sql = @"DELETE FROM ActiveGameSessions";
             await connection.ExecuteAsync(sql);
             return Results.Ok();
@@ -37,15 +38,11 @@ namespace QuizAPI.Commands
 
         public async Task<IResult> RemoveGameSession(string activeGameSessionId)
         {
-            using var connection = CreateConnection();
+            using var connection = SqlConnection.CreateConnection(_connectionString);
             var sql = @$"DELETE FROM ActiveGameSessions where GameSessionId = {activeGameSessionId}";
             await connection.ExecuteAsync(sql);
             return Results.Ok();
         }
 
-        private SQLiteConnection CreateConnection()
-        {
-            return new SQLiteConnection(_connectionString);
-        }
     }
 }

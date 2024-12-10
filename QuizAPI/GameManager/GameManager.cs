@@ -39,7 +39,7 @@ namespace QuizAPI.GameManager
 
         public async Task<QuestionDto> GetNextQuestion(string guid)
         {
-            var questionIds = await _activeGameSessionsRepository.GetActiveQuestions(guid);
+            var questionIds = await _tempGameSessionRepository.GetNotAnsweredQuestions(guid);
             var questionIdsToArray = questionIds.ToArray();
 
             if (questionIdsToArray.Length > 0)
@@ -58,6 +58,7 @@ namespace QuizAPI.GameManager
             }
         }
 
+        //Might be optimized?
         public async Task<GameSessionDto> GetGameSession(int userRequestedQuestions = 10)
         {
             //check if a there are available spots

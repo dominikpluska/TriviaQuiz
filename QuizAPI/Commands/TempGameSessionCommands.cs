@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using QuizAPI.Dto;
 using QuizAPI.HelperMethods;
 using QuizAPI.Models;
+using QuizAPI.Repository;
 using System;
 
 namespace QuizAPI.Commands
@@ -11,11 +12,13 @@ namespace QuizAPI.Commands
     {
         private readonly string _connectionString;
         private readonly IConfiguration _configuration;
+        private readonly IActiveGameSessionsRepository _activeGameSessionsRepository;
 
-        public TempGameSessionCommands(IConfiguration configuration)
+        public TempGameSessionCommands(IConfiguration configuration, IActiveGameSessionsRepository activeGameSessionsRepository)
         {
+            _activeGameSessionsRepository = activeGameSessionsRepository;
             _configuration = configuration;
-            _connectionString = _configuration.GetValue<string>("ConnectionStrings:DefaultConnection")!;
+            _connectionString = _configuration.GetValue<string>("ConnectionStrings:GameSessions")!;
         }
 
         public async Task<IResult> CreateTempTable(string guid)
@@ -64,14 +67,12 @@ namespace QuizAPI.Commands
         public async Task<IResult> DropTempTables()
         {
             using var connection = SqlConnection.CreateConnection(_connectionString);
-            var getActiveSession = $@"Select GameSessionId from ActiveGameSessions";
+            var activeGameSessions = await _activeGameSessionsRepository.GetAllGamesessionGuids();
+            var activeGameSessionsArray = activeGameSessions.ToArray();
 
-            var result = await connection.QueryAsync<string>(getActiveSession);
-            var resultArray = result.ToArray();
-
-            if(resultArray.Length > 0)
+            if(activeGameSessionsArray.Length > 0)
             {
-                foreach (var guidName in resultArray)
+                foreach (var guidName in activeGameSessionsArray)
                 {
                     var sql = $@"DROP TABLE '{guidName}'";
                     await connection.ExecuteAsync(sql);

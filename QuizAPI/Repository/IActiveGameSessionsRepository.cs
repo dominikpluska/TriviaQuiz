@@ -7,6 +7,7 @@ namespace QuizAPI.Repository
         public Task<GameSessionDto> GetActiveGameSession(int id);
         public Task<GameSessionDto> GetActiveGameSession(string guid);
         public Task<int> GetActiveGameSessionCount();
-        public Task<IEnumerable<int>> GetActiveQuestions(string guid);
+        //public Task<IEnumerable<int>> GetActiveQuestions(string guid);
+        public Task<IEnumerable<string>> GetAllGamesessionGuids();
     }
 }

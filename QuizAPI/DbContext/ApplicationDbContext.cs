@@ -24,6 +24,10 @@ namespace QuizAPI.DbContext
             {
                 SQLiteConnection.CreateFile($"{Environment.CurrentDirectory}\\Quiz.db");
             }
+            if (!File.Exists($"{Environment.CurrentDirectory}\\Quiz.db"))
+            {
+                SQLiteConnection.CreateFile($"{Environment.CurrentDirectory}\\GameSessions.db");
+            }
 
             await CreateTables();
             await SeedTables();
@@ -46,6 +50,7 @@ namespace QuizAPI.DbContext
                                     @OptionA, @OptionB, @OptionC, @OptionD, @CorrectAnswer, @QuestionScore);
                                     ";
 
+                //Move it to a JSON file
                 IEnumerable<Question> questions = new List<Question>
                 {
                     new Question() { QuestionTitle = "Poland's Capital", QuestionDescription = "Which city is Poland's capital?", QuestionCategory = "Geography",
