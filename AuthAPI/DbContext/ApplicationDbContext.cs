@@ -32,21 +32,25 @@ namespace AuthAPI.DbContext
             using var connection = SqlConnection.CreateConnection(_connectionString);
             var sql = @$"
                         CREATE TABLE IF NOT EXISTS 
-                        Users (
+                        Accounts (
                             UserId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                             UserName TEXT NOT NULL,
                             Email TEXT NOT NULL,
                             PasswordHash TEXT NOT NULL,
                             IsGameMaster INT NOT NULL,
                             IsActive INT NOT NULL
-                        )";
+                        );
+                        CREATE TABLE IF NOT EXISTS 
+                        Jwt(
+                            UserId INTEGER NOT NULL, 
+                            Token TEXT NOT NULL);";
             await connection.ExecuteAsync(sql);
         }
 
         private async Task SeedTables()
         {
             using var connection = SqlConnection.CreateConnection(_connectionString);
-            var sql = $@"INSERT INTO Users(
+            var sql = $@"INSERT INTO Accounts(
                         UserName, Email, PasswordHash, IsGameMaster, IsActive)
                         VALUES (@UserName, @Email, @PasswordHash, @IsGameMaster, @IsActive)
                         ";

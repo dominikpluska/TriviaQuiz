@@ -2,6 +2,6 @@
 {
     public interface ICreateJwtToken
     {
-        public string GenerateToken();
+        public string GenerateToken(string userName);
     }
 }

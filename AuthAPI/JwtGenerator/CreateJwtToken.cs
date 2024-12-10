@@ -27,10 +27,10 @@ namespace AuthAPI.JwtGenerator
 
         }
 
-        public string GenerateToken()
+        public string GenerateToken(string userName)
         {
             List<Claim> claims = new();
-            //claims.Add(new Claim(ClaimTypes.Role, jwtDto.Role));
+            claims.Add(new Claim(ClaimTypes.Name, userName));
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_tokenString));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
