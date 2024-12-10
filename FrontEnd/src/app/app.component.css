@@ -1,0 +1,17 @@
+.main-container {
+  @apply h-screen;
+  @apply w-full;
+  @apply flex;
+  @apply flex-col;
+  @apply text-white;
+  @apply px-32;
+  font-family: "Itim", cursive;
+  font-weight: 400;
+  font-style: normal;
+  background: linear-gradient(
+    133deg,
+    rgb(35, 45, 63) 0%,
+    rgb(25, 32, 46) 70%,
+    rgb(12, 16, 24) 100%
+  );
+}
