@@ -31,7 +31,7 @@ var tempGameSessionCommands = scope.ServiceProvider.GetRequiredService<ITempGame
 await tempGameSessionCommands.DropTempTables();
 //Clear all active game sessions
 await activeGameSession.TruncateActiveGameSession();
-app.MapGet("/", () => "Hello World!");
+app.MapGet("/", () => "This is Quiz API!");
 
 #region Question Endpoints for Admin Operation
 app.MapGet("/GetAllQuestions", async () => await questionRepository.GetAllQuestions());

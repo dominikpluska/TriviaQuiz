@@ -84,7 +84,7 @@ namespace QuizAPI.DbContext
             var sql = @"
                 CREATE TABLE IF NOT EXISTS 
                 Questions (
-                    QuestionId INTEGER NOT NULL PRIMARY KEY,
+                    QuestionId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                     QuestionTitle TEXT NOT NULL,
                     QuestionDescription TEXT NOT NULL,
                     QuestionCategory TEXT NOT NULL,
