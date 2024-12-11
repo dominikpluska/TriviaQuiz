@@ -1,0 +1,3 @@
+div {
+  @apply text-center flex-col flex items-center justify-center h-screen;
+}
