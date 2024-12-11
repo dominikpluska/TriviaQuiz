@@ -1,5 +1,5 @@
 .login-container {
-  @apply h-screen flex items-center justify-center;
+  @apply flex-col flex items-center justify-center h-screen;
 }
 .login-box {
   @apply bg-gray-600 w-2/5 h-2/5 rounded-md flex items-center justify-center;
@@ -10,5 +10,9 @@
 }
 
 .main-h1 {
-  @apply text-center text-3xl mb-10;
+  @apply text-center text-3xl mb-5;
+}
+
+.div-class {
+  @apply flex flex-col;
 }

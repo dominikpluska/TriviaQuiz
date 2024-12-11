@@ -2,11 +2,5 @@ div {
   @apply text-center flex-col flex items-center justify-center h-screen;
 }
 h1 {
-  @apply text-3xl;
-}
-h3 {
-  @apply text-xl;
-}
-span {
-  @apply pb-8;
+  @apply text-4xl;
 }

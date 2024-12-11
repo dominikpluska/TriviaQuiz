@@ -1,0 +1,17 @@
+.login-container {
+  @apply h-screen flex items-center justify-center;
+}
+.login-box {
+  @apply bg-gray-600 w-2/5 h-3/5 rounded-md flex items-center justify-center;
+}
+.div-class {
+  @apply flex flex-col;
+}
+
+.content-box {
+  @apply col-start-2;
+}
+
+.main-h1 {
+  @apply text-center text-3xl mb-10;
+}

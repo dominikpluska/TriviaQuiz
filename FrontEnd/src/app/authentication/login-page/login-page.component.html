@@ -1,9 +1,25 @@
 <div class="login-container">
   <div class="login-box">
-    <div class="content-box">
+    <form class="content-box" [formGroup]="loginForm">
       <h1 class="main-h1">Log in Form</h1>
-      <app-input type="text" label="Login" />
-      <app-input type="password" label="Password" />
-    </div>
+      <div class="div-class">
+        <label>Login</label>
+        <input type="text" formControlName="login" />
+        <label>Password</label>
+        <input type="password" formControlName="password" />
+      </div>
+      <div class="grid grid-cols-2">
+        <app-button
+          content="Log in"
+          buttonClass="main"
+          (buttonClick)="LogActoin()"
+        />
+        <!-- <app-button
+          buttonClass="secondary"
+          (buttonClick)="LogActoin()"
+        /> -->
+        <app-link-button content="Register Account" link="/register" />
+      </div>
+    </form>
   </div>
 </div>

@@ -1,1 +1,24 @@
-<p>registration-page works!</p>
+<div class="login-container">
+  <div class="login-box">
+    <form class="content-box">
+      <h1 class="main-h1">Registration Form</h1>
+      <div class="div-class">
+        <label>Login</label>
+        <input type="text" />
+        <label>Email</label>
+        <input type="text" />
+        <label>Password</label>
+        <input type="password" />
+        <label>Confirm Password</label>
+        <input type="password" />
+      </div>
+      <form class="grid grid-cols-2">
+        <app-button
+          content="Register Account"
+          buttonClass="main"
+          (buttonClick)="LogAction()"
+        />
+      </form>
+    </form>
+  </div>
+</div>
