@@ -9,16 +9,15 @@ namespace AuthAPI.UserManager
 {
     public class UserManager : IUserManager
     {
-        private readonly IConfiguration _configuration;
         private readonly IAccountsCommands _accountsCommands;
         private readonly IAccountsRepository _accountsRepository;
         private readonly IJwtCommands _jwtCommands;
         private readonly ICreateJwtToken _createToken;
 
-        public UserManager(IConfiguration configuration, IAccountsCommands accountsCommands, IAccountsRepository accountsRepository, 
-               ICreateJwtToken createJwtToken, IJwtCommands jwtCommands)
+        public UserManager(IAccountsCommands accountsCommands, IAccountsRepository accountsRepository, ICreateJwtToken createJwtToken,
+                            IJwtCommands jwtCommands)
         {
-            _configuration = configuration;
+   
             _createToken = createJwtToken;
             _jwtCommands = jwtCommands;
             _accountsCommands = accountsCommands;
