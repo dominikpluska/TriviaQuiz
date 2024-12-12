@@ -1,0 +1,7 @@
+.main-container {
+  @apply h-screen;
+}
+
+.test {
+  @apply mb-28;
+}

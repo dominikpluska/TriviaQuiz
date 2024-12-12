@@ -4,6 +4,8 @@ import { RegistrationPageComponent } from './authentication/registration-page/re
 import { MainPageComponent } from './main-page/main-page.component';
 import { NotFoundPageComponent } from './not-found-page/not-found-page.component';
 import { AccountPageComponent } from './account-page/account-page.component';
+import { QuestionPageComponent } from './question-page/question-page.component';
+import { StatsPageComponent } from './stats-page/stats-page.component';
 
 export const routes: Routes = [
   {
@@ -25,5 +27,13 @@ export const routes: Routes = [
   {
     path: 'account',
     component: AccountPageComponent,
+  },
+  {
+    path: 'game',
+    component: QuestionPageComponent,
+  },
+  {
+    path: 'stats',
+    component: StatsPageComponent,
   },
 ];

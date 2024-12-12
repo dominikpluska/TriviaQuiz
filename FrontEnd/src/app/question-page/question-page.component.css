@@ -1,0 +1,11 @@
+.main-container {
+  @apply text-center flex-col flex items-center justify-center h-screen;
+}
+
+.question-box {
+  @apply grid grid-cols-2 gap-4;
+}
+
+thead {
+  @apply bg-zinc-400;
+}

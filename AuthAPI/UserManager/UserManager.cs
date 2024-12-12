@@ -9,7 +9,6 @@ namespace AuthAPI.UserManager
 {
     public class UserManager : IUserManager
     {
-        private readonly string _connectionString;
         private readonly IConfiguration _configuration;
         private readonly IAccountsCommands _accountsCommands;
         private readonly IAccountsRepository _accountsRepository;
@@ -24,7 +23,6 @@ namespace AuthAPI.UserManager
             _jwtCommands = jwtCommands;
             _accountsCommands = accountsCommands;
             _accountsRepository = accountsRepository;
-            _connectionString = _configuration.GetValue<string>("ConnectionStrings:DefaultConnection")!;
         }
 
         public async Task RegisterNewUser(UserDto userDto)
@@ -67,9 +65,26 @@ namespace AuthAPI.UserManager
         }
 
         //To be implemented!
-        public async Task ChangePassword()
+        public async Task<IResult> ChangePassword(int id, string password)
         {
+            var userFromDB = await _accountsRepository.GetUser(id);
+            if (userFromDB == null)
+            {
+                return Results.NotFound();
+            }
+            else
+            {
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
+                User user = new()
+                {
+                    UserName = userFromDB.UserName,
+                    PasswordHash = passwordHash,
 
+                };
+                await _accountsCommands.Update(user);
+                return Results.Ok("Password updated");
+            }
+            
         }
     }
 }

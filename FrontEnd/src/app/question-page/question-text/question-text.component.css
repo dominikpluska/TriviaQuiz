@@ -1,0 +1,4 @@
+div {
+  @apply pb-12;
+  max-width: 650px;
+}
