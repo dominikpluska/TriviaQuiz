@@ -1,21 +1,29 @@
-<div class="login-container">
-  <div class="login-box">
-    <form class="content-box" [formGroup]="loginForm">
-      <h1 class="main-h1">Log in Form</h1>
-      <div class="div-class">
-        <label>Login</label>
-        <input type="text" formControlName="login" />
-        <label>Password</label>
-        <input type="password" formControlName="password" />
-      </div>
-      <div class="grid grid-cols-2">
-        <app-button
-          content="Log in"
-          buttonClass="main"
-          (buttonClick)="LogActoin()"
-        />
-        <app-link-button content="Register Account" link="/register" />
-      </div>
-    </form>
-  </div>
+<div class="h-screen flex items-center flex-col pt-12">
+  <form
+    class="h-2/5 w-2/5 flex flex-col rounded-lg justify-center items-center text-center bg-gray-600"
+    [formGroup]="loginForm"
+  >
+    <h1 class="text-3xl mb-5">Login Form</h1>
+    @if(!wasCorrectGet){
+    <p class="text-red-600">Login or password were incorrect!</p>
+    }
+    <label>Login</label>
+
+    <input type="text" formControlName="login" [class]="setInputStyle()" />
+    <label>Password</label>
+    <input
+      type="password"
+      formControlName="password"
+      [class]="setInputStyle()"
+    />
+
+    <div class="grid grid-cols-2">
+      <app-button
+        content="Log in"
+        buttonClass="main"
+        (buttonClick)="LogActoin()"
+      />
+      <app-link-button content="Register Account" link="/register" />
+    </div>
+  </form>
 </div>

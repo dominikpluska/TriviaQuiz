@@ -8,18 +8,26 @@ import {
 } from '@angular/forms';
 import { RegisterModel } from '../../models/register.model';
 import { AuthorizatinService } from '../../services/authorizationcalls.service';
-import { NgStyle } from '@angular/common';
+import { RegistrationSuccessComponent } from './registration-success/registration-success.component';
+import { RegistrationErrorComponent } from './registration-error/registration-error.component';
 
 @Component({
   selector: 'app-registration-page',
   standalone: true,
-  imports: [ButtonComponent, ReactiveFormsModule, NgStyle],
+  imports: [
+    ButtonComponent,
+    ReactiveFormsModule,
+    RegistrationSuccessComponent,
+    RegistrationErrorComponent,
+  ],
   templateUrl: './registration-page.component.html',
   styleUrl: './registration-page.component.css',
 })
 export class RegistrationPageComponent {
   private registerApiCall = inject(AuthorizatinService);
   private doPasswordsMatch = true;
+  private requestSent = false;
+  private wasError = false;
 
   registerForm = new FormGroup({
     userName: new FormControl('', [
@@ -44,10 +52,8 @@ export class RegistrationPageComponent {
         this.registerForm.value.confirmPassword
       )
     ) {
-      console.log('Password COrrect');
-      this.registerApiCall.createAccount(this.ConstructRegisterModel);
+      this.registerApiCall.createAccount(this.constructRegisterModel);
     } else {
-      console.log('Password Incorrect!');
       return;
     }
   }
@@ -63,8 +69,19 @@ export class RegistrationPageComponent {
       return false;
     }
   }
+  setPasswordInputStyle() {
+    if (this.doPasswordsMatch) {
+      return `mb-2 w-96 px-2 py-2 rounded-lg bg-slate-300 text-black border-2 
+      border-gray-800 focus:border-slate-900 focus:outline-none 
+      focus:bg-slate-500 w-3/5`;
+    } else {
+      return `mb-2 w-96 px-2 py-2 rounded-lg bg-red-300 text-black border-2 
+      border-red-800 focus:border-red-900 focus:outline-none 
+      focus:bg-slate-500 w-3/5`;
+    }
+  }
 
-  get ConstructRegisterModel() {
+  get constructRegisterModel() {
     let registerModel: RegisterModel = {
       UserName: this.registerForm.value.userName,
       Email: this.registerForm.value.email,
@@ -77,15 +94,10 @@ export class RegistrationPageComponent {
     return this.doPasswordsMatch;
   }
 
-  setPasswordInputStyle() {
-    if (this.doPasswordsMatch) {
-      return `mb-2 w-96 px-2 py-2 rounded-lg bg-slate-300 text-black border-2 
-      border-gray-800 focus:border-slate-900 focus:outline-none 
-      focus:bg-slate-500 w-3/5`;
-    } else {
-      return `mb-2 w-96 px-2 py-2 rounded-lg bg-red-300 text-black border-2 
-      border-red-800 focus:border-red-900 focus:outline-none 
-      focus:bg-slate-500 w-3/5`;
-    }
+  get getRequestSent() {
+    return this.requestSent;
+  }
+  get getWasError() {
+    return this.wasError;
   }
 }

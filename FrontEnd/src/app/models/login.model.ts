@@ -1,4 +1,4 @@
-export interface loginModel {
-  login: string;
-  password: string;
+export interface LoginModel {
+  userName: string | undefined | null;
+  password: string | undefined | null;
 }
