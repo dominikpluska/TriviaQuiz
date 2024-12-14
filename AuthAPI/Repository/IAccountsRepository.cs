@@ -8,5 +8,6 @@ namespace AuthAPI.Repository
         public Task<IEnumerable<UserToDisplayDto>> GetAll();
         public Task<UserToDisplayDto> GetUser(int id);
         public Task<User> GetUser(string username);
+        public Task<string> GetUserEmail(string email);
     }
 }

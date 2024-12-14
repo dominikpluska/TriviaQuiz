@@ -4,9 +4,8 @@
     [formGroup]="loginForm"
   >
     <h1 class="text-3xl mb-5">Login Form</h1>
-    @if(!wasCorrectGet){
-    <p class="text-red-600">Login or password were incorrect!</p>
-    }
+    <p class="text-red-600">{{ getError }}</p>
+
     <label>Login</label>
 
     <input type="text" formControlName="login" [class]="setInputStyle()" />

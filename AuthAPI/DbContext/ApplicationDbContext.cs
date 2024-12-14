@@ -21,10 +21,9 @@ namespace AuthAPI.DbContext
             if (!File.Exists($"{Environment.CurrentDirectory}\\Users.db"))
             {
                 SQLiteConnection.CreateFile($"{Environment.CurrentDirectory}\\Users.db");
+                await CreateTables();
+                await SeedTables();
             }
-
-            await CreateTables();
-            await SeedTables();
         }
 
         private async Task CreateTables()
@@ -34,8 +33,8 @@ namespace AuthAPI.DbContext
                         CREATE TABLE IF NOT EXISTS 
                         Accounts (
                             UserId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                            UserName TEXT NOT NULL,
-                            Email TEXT NOT NULL,
+                            UserName TEXT NOT NULL UNIQUE,
+                            Email TEXT NOT NULL UNIQUE,
                             PasswordHash TEXT NOT NULL,
                             IsGameMaster INT NOT NULL,
                             IsActive INT NOT NULL

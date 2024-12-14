@@ -24,8 +24,20 @@ namespace AuthAPI.UserManager
             _accountsRepository = accountsRepository;
         }
 
-        public async Task RegisterNewUser(UserDto userDto)
+        public async Task<IResult> RegisterNewUser(UserDto userDto)
         {
+            var checkIfUserExist = await _accountsRepository.GetUser(userDto.UserName);
+            if (checkIfUserExist != null)
+            {
+                return Results.Problem("UserName already exists!");
+            }
+            var checkIfEmailIsBound = await _accountsRepository.GetUserEmail(userDto.Email);
+
+            if (checkIfEmailIsBound != null)
+            {
+                return Results.Problem("This email is already bound to another account! Please contanct support for help!!");
+            }
+
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password);
             User user = new();
             user.PasswordHash = passwordHash;
@@ -33,15 +45,17 @@ namespace AuthAPI.UserManager
             user.Email = userDto.Email;
 
             await _accountsCommands.Insert(user);
+            return Results.Ok("Account has been created!");
         }
 
         public async Task<IResult> Login(UserLoginDto userLoginDto)
         {
             var userAccount = await _accountsRepository.GetUser(userLoginDto.UserName);
 
+
             if (userAccount == null)
             {
-                return Results.NotFound("User doesn't exist!");
+                return Results.NotFound("Login or Password were incorrect!");
             }
             else
             {
@@ -58,7 +72,15 @@ namespace AuthAPI.UserManager
                         Token = _createToken.GenerateToken(userAccount.UserName)
                     };
                     await _jwtCommands.Insert(jwt);
-                    return Results.Ok(jwt);
+
+                    JwtDto jwtDto = new()
+                    {
+                        UserId = userAccount.UserId,
+                        UserName = userAccount.UserName,
+                        Token = jwt.Token,
+                    };
+
+                    return Results.Ok(jwtDto);
                 }
             }
         }

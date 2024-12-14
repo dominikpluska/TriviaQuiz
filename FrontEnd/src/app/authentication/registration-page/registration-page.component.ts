@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
 import { ButtonComponent } from '../../global-components/button/button.component';
 import {
   FormControl,
@@ -10,6 +10,7 @@ import { RegisterModel } from '../../models/register.model';
 import { AuthorizatinService } from '../../services/authorizationcalls.service';
 import { RegistrationSuccessComponent } from './registration-success/registration-success.component';
 import { RegistrationErrorComponent } from './registration-error/registration-error.component';
+import { catchError, throwError } from 'rxjs';
 
 @Component({
   selector: 'app-registration-page',
@@ -25,9 +26,11 @@ import { RegistrationErrorComponent } from './registration-error/registration-er
 })
 export class RegistrationPageComponent {
   private registerApiCall = inject(AuthorizatinService);
+  private destroyRef = inject(DestroyRef);
   private doPasswordsMatch = true;
   private requestSent = false;
   private wasError = false;
+  errorMessage = '';
 
   registerForm = new FormGroup({
     userName: new FormControl('', [
@@ -52,7 +55,25 @@ export class RegistrationPageComponent {
         this.registerForm.value.confirmPassword
       )
     ) {
-      this.registerApiCall.createAccount(this.constructRegisterModel);
+      const subscription = this.registerApiCall
+        .createAccount(this.constructRegisterModel)
+        .pipe(
+          catchError((error) => {
+            return throwError(() => new Error(error));
+          })
+        )
+        .subscribe({
+          next: (response) => {
+            this.requestSent = true;
+            console.log('Success:');
+          },
+          error: (error) => {
+            this.requestSent = true;
+            this.wasError = true;
+            this.errorMessage = error;
+          },
+        });
+      this.destroyRef.onDestroy(() => subscription.unsubscribe());
     } else {
       return;
     }

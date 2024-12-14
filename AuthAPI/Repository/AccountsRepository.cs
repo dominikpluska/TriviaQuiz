@@ -39,7 +39,20 @@ namespace AuthAPI.Repository
             var sql = $@"SELECT UserId, UserName, Email, IsGameMaster, IsActive, PasswordHash 
                         FROM Accounts Where UserName = '{username}'";
 
-            return await connection.QuerySingleAsync<User>(sql);
+            var result = await connection.QueryAsync<User>(sql);
+
+            return result.FirstOrDefault();
         }
+
+        public async Task<string> GetUserEmail(string email)
+        {
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+            var sql = $@"SELECT Email FROM Accounts Where Email = '{email}'";
+
+            var result = await connection.QueryAsync<string>(sql);
+
+            return result.FirstOrDefault();
+        }
+
     }
 }
