@@ -6,15 +6,13 @@ import { NotFoundPageComponent } from './not-found-page/not-found-page.component
 import { AccountPageComponent } from './account-page/account-page.component';
 import { QuestionPageComponent } from './question-page/question-page.component';
 import { StatsPageComponent } from './stats-page/stats-page.component';
+import { AuthGuard } from './services/authguard.service';
 
 export const routes: Routes = [
   {
-    path: '*',
-    component: NotFoundPageComponent,
-  },
-  {
-    path: 'main',
-    component: MainPageComponent,
+    path: '',
+    redirectTo: '/main',
+    pathMatch: 'full',
   },
   {
     path: 'login',
@@ -25,15 +23,27 @@ export const routes: Routes = [
     component: RegistrationPageComponent,
   },
   {
+    path: '*',
+    component: NotFoundPageComponent,
+  },
+  {
+    path: 'main',
+    component: MainPageComponent,
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'account',
     component: AccountPageComponent,
+    canActivate: [AuthGuard],
   },
   {
     path: 'game',
     component: QuestionPageComponent,
+    canActivate: [AuthGuard],
   },
   {
     path: 'stats',
     component: StatsPageComponent,
+    canActivate: [AuthGuard],
   },
 ];

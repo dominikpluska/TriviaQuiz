@@ -12,9 +12,7 @@ namespace AuthAPI.JwtGenerator
         private readonly string _tokenString;
         private readonly string _issuer;
         private readonly string _audience;
-        private readonly DateTime _expiryTime = new DateTime().AddHours(8);
-
-
+        private readonly DateTime _expiryTime = new DateTime().AddHours(1);
         private readonly IConfiguration _configuration;
 
 

@@ -1,8 +1,10 @@
 ﻿using AuthAPI.Commands;
+using AuthAPI.CookieGenerator;
 using AuthAPI.Dto;
 using AuthAPI.JwtGenerator;
 using AuthAPI.Models;
 using AuthAPI.Repository;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
 namespace AuthAPI.UserManager
@@ -13,15 +15,17 @@ namespace AuthAPI.UserManager
         private readonly IAccountsRepository _accountsRepository;
         private readonly IJwtCommands _jwtCommands;
         private readonly ICreateJwtToken _createToken;
+        private readonly ICookieGenerator _cookieGenerator;
 
         public UserManager(IAccountsCommands accountsCommands, IAccountsRepository accountsRepository, ICreateJwtToken createJwtToken,
-                            IJwtCommands jwtCommands)
+                            IJwtCommands jwtCommands, ICookieGenerator cookieGenerator)
         {
    
             _createToken = createJwtToken;
             _jwtCommands = jwtCommands;
             _accountsCommands = accountsCommands;
             _accountsRepository = accountsRepository;
+            _cookieGenerator = cookieGenerator;
         }
 
         public async Task<IResult> RegisterNewUser(UserDto userDto)
@@ -48,7 +52,7 @@ namespace AuthAPI.UserManager
             return Results.Ok("Account has been created!");
         }
 
-        public async Task<IResult> Login(UserLoginDto userLoginDto)
+        public async Task<IResult> Login(UserLoginDto userLoginDto, HttpContext httpContext)
         {
             var userAccount = await _accountsRepository.GetUser(userLoginDto.UserName);
 
@@ -80,7 +84,12 @@ namespace AuthAPI.UserManager
                         Token = jwt.Token,
                     };
 
-                    return Results.Ok(jwtDto);
+                    
+
+                    var cookie = _cookieGenerator.GenerateCookie(DateTime.Now.AddHours(1));
+                    httpContext.Response.Cookies.Append("TriviaQuiz", jwt.Token, cookie);
+
+                    return Results.Ok("Login successful");
                 }
             }
         }
@@ -106,6 +115,32 @@ namespace AuthAPI.UserManager
                 return Results.Ok("Password updated");
             }
             
+        }
+
+        public IResult CheckAuthentication(HttpContext httpContext)
+        {
+            if (httpContext.Request.Cookies.ContainsKey("TriviaQuiz"))
+            {
+                return Results.Ok(new {message = "Authenticated"});
+            }
+            else
+            {
+                return Results.Unauthorized();
+            }
+        }
+
+        public IResult Logout(HttpContext httpContext)
+        {
+            if (httpContext.Request.Cookies.ContainsKey("TriviaQuiz"))
+            {
+                var cookie = _cookieGenerator.GenerateCookie(DateTime.Now.AddDays(-1));
+                httpContext.Response.Cookies.Append("TriviaQuiz", "", cookie);
+                return Results.Ok(new { message = "Logged out successfully" });
+            }
+            else
+            {
+                return Results.BadRequest("No cookie detected!");
+            }
         }
     }
 }

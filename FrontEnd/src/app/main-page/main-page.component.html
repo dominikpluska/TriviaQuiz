@@ -10,5 +10,9 @@
   <app-button buttonClass="main" content="Start Game" />
   <app-link-button link="/stats" content="Statistics" />
   <app-link-button link="/account" content="Account Settings" />
-  <app-button buttonClass="secondary" content="Log out" />
+  <app-button
+    buttonClass="secondary"
+    content="Log out"
+    (buttonClick)="logOut()"
+  />
 </div>

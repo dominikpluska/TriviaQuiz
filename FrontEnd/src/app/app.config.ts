@@ -16,6 +16,7 @@ function ContentTypeInterceptor(
 ) {
   const requestClone = request.clone({
     headers: request.headers.set('Content-Type', 'application/json'),
+    withCredentials: true,
   });
   return next(requestClone);
 }

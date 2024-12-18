@@ -1,10 +1,11 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { ButtonComponent } from '../../global-components/button/button.component';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { LinkButtonComponent } from '../../global-components/link-button/link-button.component';
 import { AuthorizatinService } from '../../services/authorizationcalls.service';
 import { LoginModel } from '../../models/login.model';
 import { catchError, throwError } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login-page',
@@ -13,9 +14,10 @@ import { catchError, throwError } from 'rxjs';
   templateUrl: './login-page.component.html',
   styleUrl: './login-page.component.css',
 })
-export class LoginPageComponent {
-  private loginApiCall = inject(AuthorizatinService);
+export class LoginPageComponent implements OnInit {
+  private authorizationService = inject(AuthorizatinService);
   private destroyRef = inject(DestroyRef);
+  private router = inject(Router);
   private errorMessage = '';
 
   loginForm = new FormGroup({
@@ -23,8 +25,28 @@ export class LoginPageComponent {
     password: new FormControl(''),
   });
 
+  ngOnInit() {
+    const subscription = this.authorizationService
+      .checkAuthorization()
+      .pipe(
+        catchError((error) => {
+          return throwError(() => new Error(error));
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          this.errorMessage = '';
+          this.router.navigate(['/main']);
+        },
+        error: (error) => {
+          this.errorMessage = error;
+        },
+      });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
+
   LogActoin() {
-    const subscription = this.loginApiCall
+    const subscription = this.authorizationService
       .logIn(this.constructLoginModel)
       .pipe(
         catchError((error) => {
@@ -34,7 +56,7 @@ export class LoginPageComponent {
       .subscribe({
         next: (response) => {
           this.errorMessage = '';
-          console.log('Success:', response);
+          this.router.navigate(['/main']);
         },
         error: (error) => {
           this.errorMessage = error;

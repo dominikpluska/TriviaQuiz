@@ -94,7 +94,7 @@ export class RegistrationPageComponent {
     if (this.doPasswordsMatch) {
       return `mb-2 w-96 px-2 py-2 rounded-lg bg-slate-300 text-black border-2 
       border-gray-800 focus:border-slate-900 focus:outline-none 
-      focus:bg-slate-500 w-3/5`;
+      focus:bg-slate-500 `;
     } else {
       return `mb-2 w-96 px-2 py-2 rounded-lg bg-red-300 text-black border-2 
       border-red-800 focus:border-red-900 focus:outline-none 
