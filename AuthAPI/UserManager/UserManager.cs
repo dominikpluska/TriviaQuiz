@@ -6,6 +6,7 @@ using AuthAPI.Models;
 using AuthAPI.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace AuthAPI.UserManager
 {
@@ -70,24 +71,24 @@ namespace AuthAPI.UserManager
 
                 else
                 {
-                    Jwt jwt = new()
-                    {
-                        UserId = userAccount.UserId,
-                        Token = _createToken.GenerateToken(userAccount.UserName)
-                    };
-                    await _jwtCommands.Insert(jwt);
+                    //Jwt jwt = new()
+                    //{
+                    //    UserId = userAccount.UserId,
+                    //    Token = _createToken.GenerateToken(userAccount.UserName)
+                    //};
+                    //await _jwtCommands.Insert(jwt);
 
-                    JwtDto jwtDto = new()
-                    {
-                        UserId = userAccount.UserId,
-                        UserName = userAccount.UserName,
-                        Token = jwt.Token,
-                    };
+                    //JwtDto jwtDto = new()
+                    //{
+                    //    UserId = userAccount.UserId,
+                    //    UserName = userAccount.UserName,
+                    //    Token = _createToken.GenerateToken(userAccount.UserName),
+                    //};
 
                     
 
                     var cookie = _cookieGenerator.GenerateCookie(DateTime.Now.AddHours(1));
-                    httpContext.Response.Cookies.Append("TriviaQuiz", jwt.Token, cookie);
+                    httpContext.Response.Cookies.Append("TriviaQuiz", _createToken.GenerateToken(userAccount.UserName), cookie);
 
                     return Results.Ok("Login successful");
                 }

@@ -62,8 +62,6 @@ builder.Services.AddScoped<IUserManager, UserManager>();
 builder.Services.AddScoped<IAdminManager, AdminManager>();
 builder.Services.AddScoped<ICookieGenerator, CookieGenerator>();
 
-
-builder.Services.AddHttpLogging(o => { });
 var app = builder.Build();
 app.UseHttpLogging();
 app.UseCors();
