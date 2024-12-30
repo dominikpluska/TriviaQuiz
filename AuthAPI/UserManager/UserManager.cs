@@ -7,6 +7,7 @@ using AuthAPI.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace AuthAPI.UserManager
 {
@@ -14,16 +15,14 @@ namespace AuthAPI.UserManager
     {
         private readonly IAccountsCommands _accountsCommands;
         private readonly IAccountsRepository _accountsRepository;
-        private readonly IJwtCommands _jwtCommands;
         private readonly ICreateJwtToken _createToken;
         private readonly ICookieGenerator _cookieGenerator;
 
         public UserManager(IAccountsCommands accountsCommands, IAccountsRepository accountsRepository, ICreateJwtToken createJwtToken,
-                            IJwtCommands jwtCommands, ICookieGenerator cookieGenerator)
+                            ICookieGenerator cookieGenerator)
         {
    
             _createToken = createJwtToken;
-            _jwtCommands = jwtCommands;
             _accountsCommands = accountsCommands;
             _accountsRepository = accountsRepository;
             _cookieGenerator = cookieGenerator;
@@ -71,24 +70,10 @@ namespace AuthAPI.UserManager
 
                 else
                 {
-                    //Jwt jwt = new()
-                    //{
-                    //    UserId = userAccount.UserId,
-                    //    Token = _createToken.GenerateToken(userAccount.UserName)
-                    //};
-                    //await _jwtCommands.Insert(jwt);
-
-                    //JwtDto jwtDto = new()
-                    //{
-                    //    UserId = userAccount.UserId,
-                    //    UserName = userAccount.UserName,
-                    //    Token = _createToken.GenerateToken(userAccount.UserName),
-                    //};
-
-                    
-
+                    var cookieUserName = _cookieGenerator.GenerateCookie(DateTime.Now.AddHours(8));
                     var cookie = _cookieGenerator.GenerateCookie(DateTime.Now.AddHours(1));
                     httpContext.Response.Cookies.Append("TriviaQuiz", _createToken.GenerateToken(userAccount.UserName), cookie);
+                    httpContext.Response.Cookies.Append("TriviaQuizUserName", userAccount.UserName, cookieUserName);
 
                     return Results.Ok("Login successful");
                 }
@@ -120,9 +105,12 @@ namespace AuthAPI.UserManager
 
         public IResult CheckAuthentication(HttpContext httpContext)
         {
+            var token = httpContext.Request.Cookies["TriviaQuiz"];
+
             if (httpContext.Request.Cookies.ContainsKey("TriviaQuiz"))
             {
-                return Results.Ok(new {message = "Authenticated"});
+                var userName = httpContext.Request.Cookies["TriviaQuizUserName"];
+                return Results.Ok(new {message = "Authenticated", user = userName});
             }
             else
             {
@@ -135,13 +123,30 @@ namespace AuthAPI.UserManager
             if (httpContext.Request.Cookies.ContainsKey("TriviaQuiz"))
             {
                 var cookie = _cookieGenerator.GenerateCookie(DateTime.Now.AddDays(-1));
+                var cookieUserName = _cookieGenerator.GenerateCookie(DateTime.Now.AddHours(-1));
+                
+
                 httpContext.Response.Cookies.Append("TriviaQuiz", "", cookie);
+                httpContext.Response.Cookies.Append("TriviaQuizUserName", "", cookieUserName);
                 return Results.Ok(new { message = "Logged out successfully" });
             }
             else
             {
                 return Results.BadRequest("No cookie detected!");
             }
+        }
+
+        public async Task<IResult> GetUser(string userName)
+        {
+            var user = await _accountsRepository.GetUser(userName);
+            UserToDisplayDto userToDisplayDto = new() {
+                UserId = user.UserId,
+                UserName = user.UserName,
+                Email = user.Email,
+                IsActive = user.IsActive,
+                IsGameMaster = user.IsGameMaster,
+            };
+            return Results.Ok(userToDisplayDto);
         }
     }
 }

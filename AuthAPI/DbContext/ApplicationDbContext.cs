@@ -38,11 +38,7 @@ namespace AuthAPI.DbContext
                             PasswordHash TEXT NOT NULL,
                             IsGameMaster INT NOT NULL,
                             IsActive INT NOT NULL
-                        );
-                        CREATE TABLE IF NOT EXISTS 
-                        Jwt(
-                            UserId INTEGER NOT NULL, 
-                            Token TEXT NOT NULL);";
+                        );";
             await connection.ExecuteAsync(sql);
         }
 

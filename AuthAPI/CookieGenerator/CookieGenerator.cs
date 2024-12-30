@@ -1,4 +1,5 @@
 ﻿using Microsoft.Net.Http.Headers;
+using System;
 
 namespace AuthAPI.CookieGenerator
 {
@@ -13,5 +14,15 @@ namespace AuthAPI.CookieGenerator
             cookieOptions.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
             return cookieOptions;
         }
+
+        //public CookieOptions GenerateNonHttpCookie(DateTime dateTime)
+        //{
+        //    CookieOptions cookieOptions = new();
+        //    cookieOptions.Expires = dateTime;
+        //    cookieOptions.Secure = true;
+        //    cookieOptions.HttpOnly = false;
+        //    cookieOptions.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
+        //    return cookieOptions;
+        //}
     }
 }

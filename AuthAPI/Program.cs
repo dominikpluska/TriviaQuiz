@@ -19,7 +19,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
     {
-        builder.WithOrigins("http://localhost:4200")
+        builder.WithOrigins("http://localhost:4200", "https://localhost:7500")
                .AllowAnyMethod()
                .AllowAnyHeader()
                .AllowCredentials();
@@ -37,7 +37,7 @@ builder.Services.AddAuthentication(options =>
     {
         ValidateIssuer = true,
         ValidateAudience = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("qOOe8L1qsDZWjSsvG0aIz10VdB6HgMLu9LUwlyM6"))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetValue<string>("JwtSettings:TokenString")!))
     };
     options.Events = new JwtBearerEvents
     {
@@ -63,7 +63,6 @@ builder.Services.AddScoped<IAdminManager, AdminManager>();
 builder.Services.AddScoped<ICookieGenerator, CookieGenerator>();
 
 var app = builder.Build();
-app.UseHttpLogging();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -93,6 +92,7 @@ app.MapPost("/Register", async (UserDto userDto) => await userManager.RegisterNe
 app.MapPost("/Login", async (UserLoginDto userLoginDto, HttpContext httpContext) => await userManager.Login(userLoginDto, httpContext));
 app.MapGet("/AuthCheck", (HttpContext httpContext) => userManager.CheckAuthentication(httpContext));
 app.MapGet("/LogOut", (HttpContext httpContext) => userManager.Logout(httpContext));
+app.MapGet("/GetUser", (string userName) => userManager.GetUser(userName));
 #endregion
 
 app.Run();

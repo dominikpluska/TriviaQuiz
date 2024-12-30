@@ -46,5 +46,34 @@ namespace AuthAPI.JwtGenerator
 
             return jwtToken;
         }
+
+        public string DecodeToken(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var readToken = handler.ReadJwtToken(token);
+            var key = Encoding.UTF8.GetBytes(_tokenString);
+
+            //var tokenValidationParameters = new TokenValidationParameters
+            //{
+            //    ValidateIssuer = true,
+            //    ValidateAudience = true,
+            //    ValidateLifetime = true,
+            //    ValidateIssuerSigningKey = true,
+            //    ValidIssuer = _issuer,
+            //    ValidAudience = _audience,
+            //    IssuerSigningKey = new SymmetricSecurityKey(key)
+            //};
+
+
+            //var principal = handler.ValidateToken(token, tokenValidationParameters, out var validatedToken);
+
+            //if (validatedToken is JwtSecurityToken jwtTokenValidated)
+            //{
+            //    var usernameClaim = principal.FindFirst(ClaimTypes.Name);
+            //    return usernameClaim?.Value;
+            //}
+
+            return null;
+        }
     }
 }

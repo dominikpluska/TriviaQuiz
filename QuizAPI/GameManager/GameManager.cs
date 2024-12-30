@@ -1,11 +1,15 @@
 ﻿using Dapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Http;
 using QuizAPI.Commands;
 using QuizAPI.Dto;
 using QuizAPI.HelperMethods;
 using QuizAPI.Models;
 using QuizAPI.Repository;
+using QuizAPI.Services;
 using System.Data.SQLite;
+using System.Net.Http;
 using System.Text.Json;
 
 namespace QuizAPI.GameManager
@@ -21,10 +25,11 @@ namespace QuizAPI.GameManager
         private readonly ITempGameSessionRepository _tempGameSessionRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly ICashedGameSessions _cashedGameSessions;
+        private readonly IAuthenticationService _authenticationService;
 
         public GameManager(IConfiguration configuration, IActiveGameSessionsCommands activeGameSessionsCommands, IActiveGameSessionsRepository activeGameSessionsRepository,
                            ITempGameSessionCommands tempGameSessionCommands, ITempGameSessionRepository tempGameSessionRepository, ICashedGameSessions cashedGameSessions,
-                           IQuestionRepository questionRepository)
+                           IQuestionRepository questionRepository, IAuthenticationService authenticationService)
         {
             _configuration = configuration;
             _activeGameSessionsCommands = activeGameSessionsCommands;
@@ -33,12 +38,19 @@ namespace QuizAPI.GameManager
             _tempGameSessionRepository = tempGameSessionRepository;
             _cashedGameSessions = cashedGameSessions;
             _questionRepository = questionRepository;
+            _authenticationService = authenticationService;
             allowedActiveGameSessions = _configuration.GetValue<int>("GeneralSettings:NumberOfConnectionsAllowed")!;
             _connectionString = _configuration.GetValue<string>("ConnectionStrings:DefaultConnection")!;
         }
 
-        public async Task<QuestionDto> GetNextQuestion(string guid)
+        public async Task<QuestionDto> GetNextQuestion(HttpContext httpContext)
         {
+            //Get Active Game Session
+            var user = await _authenticationService.GetUser(httpContext);
+            UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(user);
+            var activeTable = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
+            string guid = activeTable.GameSessionId;
+
             var questionIds = await _tempGameSessionRepository.GetNotAnsweredQuestions(guid);
             var questionIdsToArray = questionIds.ToArray();
 
@@ -59,7 +71,8 @@ namespace QuizAPI.GameManager
         }
 
         //Might be optimized?
-        public async Task<GameSessionDto> GetGameSession(int userRequestedQuestions = 10)
+        //[Authorize]
+        public async Task<GameSessionDto> GetGameSession(HttpContext httpContext, int userRequestedQuestions = 10)
         {
             //check if a there are available spots
             int activeGameSessionsCount = await _activeGameSessionsRepository.GetActiveGameSessionCount();
@@ -74,7 +87,10 @@ namespace QuizAPI.GameManager
             }
 
             //check for game session
-            var checkForGameSession = await _activeGameSessionsRepository.GetActiveGameSession(1);
+            var user = await _authenticationService.GetUser(httpContext);
+            UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(user);
+
+            var checkForGameSession = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
 
             if (checkForGameSession != null)
             {
@@ -125,7 +141,8 @@ namespace QuizAPI.GameManager
                 var questionsList = await connection.QueryAsync<Question>(finalSql);
                 IEnumerable <Question> questionsListx2 = questionsList.ToList();
 
-                var activeGameSessionObject = ConstructActiveGameSessionObject();
+                //Current work
+                var activeGameSessionObject = ConstructActiveGameSessionObject(userToDisplayDto.userId, userToDisplayDto.userName);
 
                 //Post it to the database 
                 var result = await _activeGameSessionsCommands.InsertActiveGameSession(activeGameSessionObject);
@@ -186,12 +203,12 @@ namespace QuizAPI.GameManager
         }
 
         //This method and its content must be changed! 
-        private static ActiveGameSession ConstructActiveGameSessionObject()
+        private static ActiveGameSession ConstructActiveGameSessionObject(int userId, string userName)
         {
             ActiveGameSession activeGameSession = new()
             {
-                UserName = "Test",
-                UserId = 1,
+                UserName = userName,
+                UserId = userId,
             };
 
             return activeGameSession;

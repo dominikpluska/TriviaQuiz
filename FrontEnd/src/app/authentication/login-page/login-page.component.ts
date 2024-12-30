@@ -35,11 +35,10 @@ export class LoginPageComponent implements OnInit {
       )
       .subscribe({
         next: (response) => {
-          this.errorMessage = '';
           this.router.navigate(['/main']);
         },
         error: (error) => {
-          this.errorMessage = error;
+          //this.errorMessage = error;
         },
       });
     this.destroyRef.onDestroy(() => subscription.unsubscribe());

@@ -1,9 +1,10 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { ButtonComponent } from '../global-components/button/button.component';
 import { LinkButtonComponent } from '../global-components/link-button/link-button.component';
 import { Router } from '@angular/router';
 import { AuthorizatinService } from '../services/authorizationcalls.service';
 import { catchError, throwError } from 'rxjs';
+import { UserProfileService } from '../services/userprofile.service';
 
 @Component({
   selector: 'app-main-page',
@@ -12,10 +13,13 @@ import { catchError, throwError } from 'rxjs';
   templateUrl: './main-page.component.html',
   styleUrl: './main-page.component.css',
 })
-export class MainPageComponent {
+export class MainPageComponent  {
   private router = inject(Router);
   private authenticationService = inject(AuthorizatinService);
   private destroyRef = inject(DestroyRef);
+  private userProfileService = inject(UserProfileService);
+  public userName = this.userProfileService.getUserName;
+
 
   logOut() {
     const subscription = this.authenticationService
@@ -34,4 +38,5 @@ export class MainPageComponent {
       });
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
+
 }

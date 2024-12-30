@@ -1,13 +1,13 @@
 <div>
   <span>
-    <h1>Hello UserName!</h1>
+    <h1>Hello {{userName}}!</h1>
     <h3>
       Welcome to my little quiz game! Please press play to start or renew the
       active game session!
     </h3>
   </span>
 
-  <app-button buttonClass="main" content="Start Game" />
+  <app-link-button link="/game" content="Start Game" />
   <app-link-button link="/stats" content="Statistics" />
   <app-link-button link="/account" content="Account Settings" />
   <app-button

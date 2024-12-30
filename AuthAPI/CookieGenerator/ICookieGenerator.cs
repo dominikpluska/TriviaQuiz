@@ -3,5 +3,6 @@
     public interface ICookieGenerator
     {
         public CookieOptions GenerateCookie(DateTime dateTime);
+        
     }
 }
