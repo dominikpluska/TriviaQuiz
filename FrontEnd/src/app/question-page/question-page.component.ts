@@ -16,7 +16,7 @@ export class QuestionPageComponent implements OnInit {
   private gameService = inject(GameService);
   private destroyRef = inject(DestroyRef);
 
-  ngOnInit(): void {
+  ngOnInit() {
     const subscription = this.gameService
           .requestGameSession()
           .pipe(
@@ -26,7 +26,23 @@ export class QuestionPageComponent implements OnInit {
           )
           .subscribe({
             next: (response) => {
-              console.log("Success! Get another question now! :)")
+              // const subscriptionSecondary = this.gameService
+              //     .getActiveQuestion()
+              //     .pipe(
+              //       catchError((error) => {
+              //         return throwError(() => new Error(error));
+              //     })
+              //   )
+              //   .subscribe({
+              //       next: (response) => {
+              //         console.log(response)
+              //       },
+              //       error: (error) => {
+              //         console.log(error)
+              //       }
+              //     })
+              this.gameService.getActiveQuestionx2();
+                //this.destroyRef.onDestroy(() => subscriptionSecondary.unsubscribe());
               
             },
             error: (error) => {
@@ -34,22 +50,7 @@ export class QuestionPageComponent implements OnInit {
             },
           });
         
-        this.destroyRef.onDestroy(() => subscription.unsubscribe());
-        const subscriptionSecondary = this.gameService
-                  .getActiveQuestion()
-                  .pipe(
-                    catchError((error) => {
-                      return throwError(() => new Error(error));
-                  })
-                )
-                .subscribe({
-                    next: (response : any) => {
-                      console.log(response)
-                    },
-                    error: (error) => {
-                      console.log(error)
-                    }
-                  })
-         this.destroyRef.onDestroy(() => subscriptionSecondary.unsubscribe());
+        //this.destroyRef.onDestroy(() => subscription.unsubscribe());
+        
   }
 }

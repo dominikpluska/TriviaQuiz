@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using AuthAPI.UserAccessor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +62,8 @@ builder.Services.AddScoped<IJwtCommands, JwtCommands>();
 builder.Services.AddScoped<IUserManager, UserManager>();
 builder.Services.AddScoped<IAdminManager, AdminManager>();
 builder.Services.AddScoped<ICookieGenerator, CookieGenerator>();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddScoped<IUserAccessor, HttpUserAccessor>();
 
 var app = builder.Build();
 app.UseCors();
@@ -89,9 +92,9 @@ app.MapDelete(("/admin/DeactivateUse/{id}"), async (int id) => await adminManage
 
 #region UserEndpoints
 app.MapPost("/Register", async (UserDto userDto) => await userManager.RegisterNewUser(userDto));
-app.MapPost("/Login", async (UserLoginDto userLoginDto, HttpContext httpContext) => await userManager.Login(userLoginDto, httpContext));
-app.MapGet("/AuthCheck", (HttpContext httpContext) => userManager.CheckAuthentication(httpContext));
-app.MapGet("/LogOut", (HttpContext httpContext) => userManager.Logout(httpContext));
+app.MapPost("/Login", async (UserLoginDto userLoginDto) => await userManager.Login(userLoginDto));
+app.MapGet("/AuthCheck", () => userManager.CheckAuthentication());
+app.MapGet("/LogOut", () => userManager.Logout());
 app.MapGet("/GetUser", (string userName) => userManager.GetUser(userName));
 #endregion
 

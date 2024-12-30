@@ -56,22 +56,5 @@ namespace QuizAPI.Repository
 
             return resutls;
         }
-
-        //public async Task<IEnumerable<int>> GetActiveQuestions(string guid)
-        //{
-        //    using var connection = SqlConnection.CreateConnection(_connectionString);
-
-        //    var sql = @$"SELECT QuestionId 
-        //                    FROM '{guid}'
-        //                    WHERE QuestionScore = 5 AND WasAnswerCorrect IS NULL
-        //                    AND (SELECT COUNT(*) FROM Questions WHERE QuestionScore = 5) > 0
-        //                    UNION ALL
-        //                    SELECT QuestionId 
-        //                    FROM '{guid}'
-        //                    WHERE QuestionScore = 10 AND WasAnswerCorrect IS NULL
-        //                    AND (SELECT COUNT(*) FROM Questions WHERE QuestionScore = 5) = 0;";
-
-        //    return await connection.QueryAsync<int>(sql);
-        //}
     }
 }

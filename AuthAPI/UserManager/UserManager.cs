@@ -4,6 +4,7 @@ using AuthAPI.Dto;
 using AuthAPI.JwtGenerator;
 using AuthAPI.Models;
 using AuthAPI.Repository;
+using AuthAPI.UserAccessor;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
@@ -17,15 +18,17 @@ namespace AuthAPI.UserManager
         private readonly IAccountsRepository _accountsRepository;
         private readonly ICreateJwtToken _createToken;
         private readonly ICookieGenerator _cookieGenerator;
+        private readonly IUserAccessor _userAccessor;
 
         public UserManager(IAccountsCommands accountsCommands, IAccountsRepository accountsRepository, ICreateJwtToken createJwtToken,
-                            ICookieGenerator cookieGenerator)
+                            ICookieGenerator cookieGenerator, IUserAccessor userAccessor)
         {
    
             _createToken = createJwtToken;
             _accountsCommands = accountsCommands;
             _accountsRepository = accountsRepository;
             _cookieGenerator = cookieGenerator;
+            _userAccessor = userAccessor;
         }
 
         public async Task<IResult> RegisterNewUser(UserDto userDto)
@@ -52,7 +55,7 @@ namespace AuthAPI.UserManager
             return Results.Ok("Account has been created!");
         }
 
-        public async Task<IResult> Login(UserLoginDto userLoginDto, HttpContext httpContext)
+        public async Task<IResult> Login(UserLoginDto userLoginDto)
         {
             var userAccount = await _accountsRepository.GetUser(userLoginDto.UserName);
 
@@ -72,8 +75,8 @@ namespace AuthAPI.UserManager
                 {
                     var cookieUserName = _cookieGenerator.GenerateCookie(DateTime.Now.AddHours(8));
                     var cookie = _cookieGenerator.GenerateCookie(DateTime.Now.AddHours(1));
-                    httpContext.Response.Cookies.Append("TriviaQuiz", _createToken.GenerateToken(userAccount.UserName), cookie);
-                    httpContext.Response.Cookies.Append("TriviaQuizUserName", userAccount.UserName, cookieUserName);
+                    _userAccessor.SetCookie("TriviaQuiz", _createToken.GenerateToken(userAccount.UserName), cookie);
+                    _userAccessor.SetCookie("TriviaQuizUserName", userAccount.UserName, cookieUserName);
 
                     return Results.Ok("Login successful");
                 }
@@ -103,13 +106,13 @@ namespace AuthAPI.UserManager
             
         }
 
-        public IResult CheckAuthentication(HttpContext httpContext)
+        public IResult CheckAuthentication()
         {
-            var token = httpContext.Request.Cookies["TriviaQuiz"];
+            var token = _userAccessor.TokenString;
 
-            if (httpContext.Request.Cookies.ContainsKey("TriviaQuiz"))
+            if (token != null)
             {
-                var userName = httpContext.Request.Cookies["TriviaQuizUserName"];
+                var userName = _userAccessor.UserName;
                 return Results.Ok(new {message = "Authenticated", user = userName});
             }
             else
@@ -118,16 +121,16 @@ namespace AuthAPI.UserManager
             }
         }
 
-        public IResult Logout(HttpContext httpContext)
+        public IResult Logout()
         {
-            if (httpContext.Request.Cookies.ContainsKey("TriviaQuiz"))
+            var user = _userAccessor.UserName;
+            if (user != null)
             {
                 var cookie = _cookieGenerator.GenerateCookie(DateTime.Now.AddDays(-1));
                 var cookieUserName = _cookieGenerator.GenerateCookie(DateTime.Now.AddHours(-1));
-                
 
-                httpContext.Response.Cookies.Append("TriviaQuiz", "", cookie);
-                httpContext.Response.Cookies.Append("TriviaQuizUserName", "", cookieUserName);
+                _userAccessor.SetCookie("TriviaQuiz", "", cookie);
+                _userAccessor.SetCookie("TriviaQuizUserName", "", cookieUserName);
                 return Results.Ok(new { message = "Logged out successfully" });
             }
             else

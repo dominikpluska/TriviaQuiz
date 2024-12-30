@@ -19,10 +19,8 @@ namespace QuizAPI.Services
             var result = await ApiOperation(httpContext, "/AuthCheck");
         }
 
-        public async Task<string?> GetUser(HttpContext httpContext)
+        public async Task<string?> GetUser(string userName)
         {
-            string userName = httpContext.Request.Cookies["TriviaQuizUserName"];
-
             //Fix this line
             if (userName == null)
             {
