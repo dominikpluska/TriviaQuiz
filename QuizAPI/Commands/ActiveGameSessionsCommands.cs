@@ -39,7 +39,7 @@ namespace QuizAPI.Commands
         public async Task<IResult> RemoveGameSession(string activeGameSessionId)
         {
             using var connection = SqlConnection.CreateConnection(_connectionString);
-            var sql = @$"DELETE FROM ActiveGameSessions where GameSessionId = {activeGameSessionId}";
+            var sql = @$"DELETE FROM ActiveGameSessions where GameSessionId = '{activeGameSessionId}'";
             await connection.ExecuteAsync(sql);
             return Results.Ok();
         }

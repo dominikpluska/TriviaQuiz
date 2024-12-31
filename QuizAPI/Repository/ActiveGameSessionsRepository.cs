@@ -29,6 +29,16 @@ namespace QuizAPI.Repository
             return resutls;
         }
 
+        public async Task<GameSessionDto> GetActiveGameSession(string userName)
+        {
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+            var sql = @$"SELECT GameSessionId, UserId, UserName, SessionTime 
+                         FROM ActiveGameSessions WHERE UserName = '{userName}'";
+            var resutls = await connection.QueryFirstOrDefaultAsync<GameSessionDto>(sql);
+
+            return resutls;
+        }
+
         public async Task<IEnumerable<string>> GetAllGamesessionGuids()
         {
             using var connection = SqlConnection.CreateConnection(_connectionString);
@@ -38,11 +48,11 @@ namespace QuizAPI.Repository
             return result;
         }
 
-        public async Task<GameSessionDto> GetActiveGameSession(string guid)
+        public async Task<GameSessionDto> GetActiveGameSessionByGuid(string guid)
         {
             using var connection = SqlConnection.CreateConnection(_connectionString);
             var sql = @$"SELECT GameSessionId, UserId, UserName, SessionTime 
-                         FROM ActiveGameSessions WHERE GameSessionId = {guid}";
+                         FROM ActiveGameSessions WHERE GameSessionId = '{guid}'";
             var resutls = await connection.QueryFirstOrDefaultAsync<GameSessionDto>(sql);
 
             return resutls;

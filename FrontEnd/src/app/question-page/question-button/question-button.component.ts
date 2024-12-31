@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 @Component({
   selector: 'app-question-button',
@@ -9,4 +9,10 @@ import { Component, input } from '@angular/core';
 })
 export class QuestionButtonComponent {
   answer = input.required<string>();
+  select = output<string>();
+
+  onSelect(){
+    this.select.emit(this.answer());
+  }
+
 }

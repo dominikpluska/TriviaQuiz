@@ -7,7 +7,7 @@ namespace QuizAPI.Models
         public string GameSessionId { get; set; } 
         public int UserId { get; set; }
         public string UserName { get; set; }
-        public string questions { get; set; }
+        public string Questions { get; set; }
         public string SessionTime { get; set; } 
     }
 }

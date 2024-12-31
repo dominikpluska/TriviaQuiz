@@ -49,6 +49,7 @@ namespace QuizAPI.GameManager
         }
 
 
+        //Improve this method! Handle how to close the game session and inform the user about it!
         public async Task<IResult> GetNextQuestion()
         {
             var user  = _userAccessor.UserName;
@@ -59,16 +60,24 @@ namespace QuizAPI.GameManager
             if (userToDisplayDto == null)
             {
                 return null;
-                //return Results.BadRequest("User is not defined!");
             }
 
             var activeTable = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
             string guid = activeTable.GameSessionId;
 
-            var questionIds = await _tempGameSessionRepository.GetNotAnsweredQuestions(guid);
-            var questionIdsToArray = questionIds.ToArray();
+            var question5ScoreIds = await _tempGameSessionRepository.GetQuestionOf5Score(guid);
+            var question10ScoreIds = await _tempGameSessionRepository.GetQuestionOf10Score(guid);
 
+            int[] questionIdsToArray;
 
+            if(question5ScoreIds.Count() != 0)
+            {
+                questionIdsToArray = question5ScoreIds.ToArray();
+            }
+            else
+            {
+                questionIdsToArray = question10ScoreIds.ToArray();
+            }
 
             if (questionIdsToArray.Length > 0)
             {
@@ -81,8 +90,9 @@ namespace QuizAPI.GameManager
             }
             else
             {
+                
                 await CloseGameSession(guid);
-                return null;
+                return Results.Ok("Closed!");
             }
 
 
@@ -175,23 +185,24 @@ namespace QuizAPI.GameManager
 
         }
 
-        //Update this method!
-        public async Task<string> CheckCorrectAnswer(AnswerDto answerDto)
+        public async Task<IResult> CheckCorrectAnswer(AnswerDto answerDto)
         {
+            var currentUser = _userAccessor.UserName;
+            var activeGameSession = await _activeGameSessionsRepository.GetActiveGameSession(currentUser);
             //Check if the answer was correct
-            string answer = await _tempGameSessionRepository.FindCorrectAnswer(answerDto.Guid, answerDto.QuestionId);
+            string correctAnswer = await _tempGameSessionRepository.FindCorrectAnswer(activeGameSession.GameSessionId, answerDto.QuestionId);
 
-            if (answer == answerDto.Answer)
+            if (correctAnswer == answerDto.Answer)
             {
                 //Mark answer as correct in the database
-                await _tempGameSessionCommands.PostAnswer(answerDto.Guid, answerDto.QuestionId, 1);
-                return "Correct";
+                await _tempGameSessionCommands.PostAnswer(activeGameSession.GameSessionId, answerDto.QuestionId, 1);
+                return Results.Ok("Correct");
             }
             else
             {
                 //Mark answer as incorrect in the database
-                await _tempGameSessionCommands.PostAnswer(answerDto.Guid, answerDto.QuestionId, 0);
-                return "Incorrect";
+                await _tempGameSessionCommands.PostAnswer(activeGameSession.GameSessionId, answerDto.QuestionId, 0);
+                return Results.Ok("Incorrect");
             }
         }
 
@@ -202,14 +213,14 @@ namespace QuizAPI.GameManager
             string questionsToCacheJson = JsonSerializer.Serialize(questionsToCache);
 
             //Get current game session
-            GameSessionDto activeGameSession = await _activeGameSessionsRepository.GetActiveGameSession(guid);
+            GameSessionDto activeGameSession = await _activeGameSessionsRepository.GetActiveGameSessionByGuid(guid);
 
             CachedGameSessionModel cachedGameSessionModel = new()
             {
                 GameSessionId = guid,
                 UserId = activeGameSession.UserId, 
                 UserName = activeGameSession.UserName, 
-                questions = questionsToCacheJson,
+                Questions = questionsToCacheJson,
                 SessionTime = activeGameSession.SessionTime,
             };
 
@@ -220,7 +231,6 @@ namespace QuizAPI.GameManager
             await _activeGameSessionsCommands.RemoveGameSession(guid);
         }
 
-        //This method and its content must be changed! 
         private static ActiveGameSession ConstructActiveGameSessionObject(int userId, string userName)
         {
             ActiveGameSession activeGameSession = new()

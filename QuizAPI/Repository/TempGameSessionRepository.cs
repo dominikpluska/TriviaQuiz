@@ -62,10 +62,26 @@ namespace QuizAPI.Repository
                             SELECT QuestionId 
                             FROM '{guid}'
                             WHERE QuestionScore = 10 AND WasAnswerCorrect IS NULL
-                            AND (SELECT COUNT(*) FROM '{guid}' WHERE QuestionScore = 5) = 0;";
+                            AND (SELECT COUNT(*) FROM '{guid}' WHERE QuestionScore = 10) > 0;";
 
             return await connection.QueryAsync<int>(sql);
         }
+        public async Task<IEnumerable<int>> GetQuestionOf5Score(string guid)
+        {
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+
+            var sql = $@"SELECT QuestionId from '{guid}' WHERE QuestionScore = 5 and WasAnswerCorrect IS NULL";
+            return await connection.QueryAsync<int>(sql);
+        }
+        public async Task<IEnumerable<int>> GetQuestionOf10Score(string guid)
+        {
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+
+            var sql = $@"SELECT QuestionId from '{guid}' WHERE QuestionScore = 10 and WasAnswerCorrect IS NULL";
+            return await connection.QueryAsync<int>(sql);
+        }
+
 
     }
+
 }

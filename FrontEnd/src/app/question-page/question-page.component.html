@@ -1,13 +1,40 @@
-<div class="main-container">
-  <div class="w-2/4 h-20 pb-40 flex justify-between">
-    <p>Your Score: 100</p>
-    <p>Time left : 30:00</p>
+@if(currentQuestion()){
+  <div class="main-container">
+    <div class="w-2/4 h-20 pb-40 flex justify-between">
+      <p>Your Score: 100</p>
+      <p>Time left : 30:00</p>
+    </div>
+    @if(wasCorrect === 'empty')
+    {
+      <app-question-text question={{currentQuestion().questionDescription}} />
+      <div class="question-box">
+        <app-question-button answer={{currentQuestion().optionA}} (select)="handleAnswer($event)"/>
+        <app-question-button answer={{currentQuestion().optionB}} (select)="handleAnswer($event)"/>
+        <app-question-button answer={{currentQuestion().optionC}} (select)="handleAnswer($event)"/>
+        <app-question-button answer={{currentQuestion().optionD}} (select)="handleAnswer($event)"/>
+      </div>
+    }
+    @if(wasCorrect === 'Correct')
+    {
+      
+        <div
+          class="w-2/5 pb-6 pt-6 rounded-lg justify-center items-center text-center bg-green-300 text-green-800"
+        >
+          <p class="mb-12">The answer was correct!</p>
+          <app-button content="Next Question" buttonClass="main" (buttonClick)="requestNextQuestion()"/>
+        </div>
+
+      
+    }
+    @if(wasCorrect === 'Incorrect')
+    {
+      <div
+      class="w-2/5 pb-6 pt-6 rounded-lg justify-center items-center text-center bg-red-300 text-red-800"
+    >
+      <p class="mb-12">The answer was incorrect!</p>
+      <app-button content="Next Question" buttonClass="main" (buttonClick)="requestNextQuestion()"/>
+    </div>
+    }
   </div>
-  <app-question-text question="What is Poland's capital?" />
-  <div class="question-box">
-    <app-question-button answer="Warsaw" />
-    <app-question-button answer="Cracow" />
-    <app-question-button answer="Łódź" />
-    <app-question-button answer="Poznań" />
-  </div>
-</div>
+}
+

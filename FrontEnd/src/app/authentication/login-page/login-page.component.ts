@@ -38,7 +38,6 @@ export class LoginPageComponent implements OnInit {
           this.router.navigate(['/main']);
         },
         error: (error) => {
-          //this.errorMessage = error;
         },
       });
     this.destroyRef.onDestroy(() => subscription.unsubscribe());

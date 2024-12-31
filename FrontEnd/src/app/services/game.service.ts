@@ -2,6 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { catchError, Observable, throwError } from "rxjs";
 import { Question } from "../models/question.model";
+import { Answer } from "../models/answer.model";
 
 @Injectable({ providedIn: 'root' })
 export class GameService{
@@ -25,8 +26,12 @@ export class GameService{
           );
     }
 
-    getActiveQuestionx2(){
-        this.httpClient.get('https://localhost:7500/GetNextQuestion').subscribe({next: (data) => console.log(data)})
+    postAnswer(answer : Answer){
+      return this.httpClient.post('https://localhost:7500/CheckCorrectAnswer', answer).pipe(
+        catchError((error) => {
+          const errorMessage = error.error;
+          return throwError(() => new Error(errorMessage));
+        })
+      );
     }
-
 }
