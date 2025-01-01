@@ -6,11 +6,12 @@ import { catchError, throwError } from 'rxjs';
 import { Question } from '../models/question.model';
 import { Answer } from '../models/answer.model';
 import { ButtonComponent } from "../global-components/button/button.component";
+import { FinishGamePageComponent } from "./finish-game-page/finish-game-page.component";
 
 @Component({
   selector: 'app-question-page',
   standalone: true,
-  imports: [QuestionButtonComponent, QuestionTextComponent, ButtonComponent],
+  imports: [QuestionButtonComponent, QuestionTextComponent, ButtonComponent, FinishGamePageComponent],
   templateUrl: './question-page.component.html',
   styleUrl: './question-page.component.css',
 })
@@ -20,47 +21,36 @@ export class QuestionPageComponent implements OnInit {
   private selectedAnswer : Answer = {Answer : "", QuestionId : 0};
   currentQuestion = signal<any>(null);
   wasCorrect : string = 'empty';
+  isGameFinished : boolean = false;
  
   ngOnInit() {
     const subscription = this.gameService
-          .requestGameSession()
-          .pipe(
-            catchError((error) => {
-              return throwError(() => new Error(error));
-            })
-          )
-          .subscribe({
-            next: (response) => {
-              const subscriptionSecondary = this.gameService
-                  .getActiveQuestion()
-                  .pipe(
-                    catchError((error) => {
-                      return throwError(() => new Error(error));
-                  })
-                )
-                .subscribe({
-                    next: (response : Question) => {
-                      this.currentQuestion.set(response);
-                    },
-                    error: (error) => {
-                      console.log(error)
-                    }
-                  })
-                this.destroyRef.onDestroy(() => subscriptionSecondary.unsubscribe());
-              
-            },
-            error: (error) => {
-              console.log(error);
-            },
-          });
-        
-        this.destroyRef.onDestroy(() => subscription.unsubscribe());
+      .getActiveQuestion()
+      .pipe(
+        catchError((error) => {
+          return throwError(() => new Error(error));
+      })
+    )
+    .subscribe({
+      next: (response : Question | string) => {
+        if(response === "Finish"){
+          this.isGameFinished = true;
+        }
+        else{
+          this.currentQuestion.set(response);
+        }
+
+      },
+        error: (error) => {
+          console.log(error)
+        }
+      })
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
   handleAnswer(answer : string){
     this.selectedAnswer.QuestionId = this.currentQuestion().questionId;
     this.selectedAnswer.Answer = answer;
-    console.log(this.selectedAnswer);
 
     const subscription = this.gameService
     .postAnswer(this.selectedAnswer)
@@ -71,7 +61,7 @@ export class QuestionPageComponent implements OnInit {
     )
     .subscribe({
       next: (response) => {
-        console.log(response.toString())
+        console.log(response)
         this.wasCorrect = response.toString();
       },
       error: (error) => {
@@ -83,7 +73,7 @@ export class QuestionPageComponent implements OnInit {
   requestNextQuestion(){
     this.wasCorrect = 'empty';
 
-    const subscriptionSecondary = this.gameService
+    const subscription = this.gameService
       .getActiveQuestion()
       .pipe(
         catchError((error) => {
@@ -91,13 +81,19 @@ export class QuestionPageComponent implements OnInit {
       })
     )
     .subscribe({
-        next: (response : Question) => {
-          this.currentQuestion.set(response);
+        next: (response : Question | string) => {
+          if(response === "Finish"){
+            this.isGameFinished = true;
+          }
+          else{
+            this.currentQuestion.set(response);
+          }
+
         },
         error: (error) => {
           console.log(error)
         }
       })
-    this.destroyRef.onDestroy(() => subscriptionSecondary.unsubscribe());
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 }

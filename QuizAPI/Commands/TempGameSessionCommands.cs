@@ -59,7 +59,7 @@ namespace QuizAPI.Commands
         public async Task<IResult> DropTempTable(string guid)
         {
             using var connection = SqlConnection.CreateConnection(_connectionString);
-            var sql = $@"DROP TABLE {guid}";
+            var sql = $@"DROP TABLE '{guid}'";
             await connection.ExecuteAsync(sql);
             return Results.Ok($"Table '{guid}' has been dropped!");
         }

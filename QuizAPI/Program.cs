@@ -99,7 +99,8 @@ app.MapDelete("/DeleteQuestion/{id}", async (int id) => await questionCommands.D
 //User request a game session with a valid session string / id. Then the game is returned to the user. The rest is handled by a game manager which is going to keep track of 
 //how many questions there are left / what is the score etc. in memory. At the end the result is saved to the database.
 app.MapGet("/GetNextQuestion",  async () => await gameManager.GetNextQuestion());
-app.MapGet("/GetGameSession", async () => await gameManager.GetGameSession());
+app.MapGet("/GetGameSession", async (int numberOfQuestions) => await gameManager.GetGameSession(numberOfQuestions));
+app.MapPost("/CloseGameSession", async () => await gameManager.CloseGameSession());
 app.MapPost("/CheckCorrectAnswer", async(AnswerDto answerDto) =>  await gameManager.CheckCorrectAnswer(answerDto));
 
 #endregion

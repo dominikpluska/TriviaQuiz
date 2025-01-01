@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
-import { catchError, Observable, throwError } from "rxjs";
+import { catchError, throwError } from "rxjs";
 import { Question } from "../models/question.model";
 import { Answer } from "../models/answer.model";
 
@@ -8,8 +8,8 @@ import { Answer } from "../models/answer.model";
 export class GameService{
     private httpClient: HttpClient = inject(HttpClient);
 
-    requestGameSession(){
-         return this.httpClient.get('https://localhost:7500/GetGameSession').pipe(
+    requestGameSession(numberOfQuestions : number){
+         return this.httpClient.get('https://localhost:7500/GetGameSession?numberOfQuestions=' + numberOfQuestions).pipe(
               catchError((error) => {
                 const errorMessage = error.error;
                 return throwError(() => new Error(errorMessage));
@@ -28,6 +28,15 @@ export class GameService{
 
     postAnswer(answer : Answer){
       return this.httpClient.post('https://localhost:7500/CheckCorrectAnswer', answer).pipe(
+        catchError((error) => {
+          const errorMessage = error.error;
+          return throwError(() => new Error(errorMessage));
+        })
+      );
+    }
+
+    closeGameSession(){
+      return this.httpClient.post('https://localhost:7500/CloseGameSession', null).pipe(
         catchError((error) => {
           const errorMessage = error.error;
           return throwError(() => new Error(errorMessage));

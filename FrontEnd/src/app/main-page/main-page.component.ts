@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthorizatinService } from '../services/authorizationcalls.service';
 import { catchError, throwError } from 'rxjs';
 import { UserProfileService } from '../services/userprofile.service';
+import { GameService } from '../services/game.service';
 
 @Component({
   selector: 'app-main-page',
@@ -18,8 +19,10 @@ export class MainPageComponent  {
   private authenticationService = inject(AuthorizatinService);
   private destroyRef = inject(DestroyRef);
   private userProfileService = inject(UserProfileService);
+  private gameService = inject(GameService);
   public userName = this.userProfileService.getUserName;
-
+  public displayGameOptions : boolean = false;
+  
 
   logOut() {
     const subscription = this.authenticationService
@@ -39,4 +42,31 @@ export class MainPageComponent  {
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
+  requestGameSession(numberOfQuestions : number){
+    const subscription = this.gameService
+              .requestGameSession(numberOfQuestions)
+              .pipe(
+                catchError((error) => {
+                  return throwError(() => new Error(error));
+                })
+              )
+              .subscribe({
+                next: (response) => {
+                  console.log(response)
+                  this.router.navigate(['/game'])
+                },
+                error: (error) => {
+                  console.log(error);
+                },
+              });
+            
+            this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
+
+  showGameOptions(){
+    this.displayGameOptions = true;
+  }
+  hideGameOptions(){
+    this.displayGameOptions = false;
+  }
 }

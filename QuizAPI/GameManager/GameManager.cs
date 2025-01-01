@@ -53,7 +53,6 @@ namespace QuizAPI.GameManager
         public async Task<IResult> GetNextQuestion()
         {
             var user  = _userAccessor.UserName;
-            //Get Active Game Session
             var userData = await _authenticationService.GetUser(user);
             UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
 
@@ -65,6 +64,11 @@ namespace QuizAPI.GameManager
             var activeTable = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
             string guid = activeTable.GameSessionId;
 
+            if(guid == null)
+            {
+                return Results.Ok("Finish");
+            }
+    
             var question5ScoreIds = await _tempGameSessionRepository.GetQuestionOf5Score(guid);
             var question10ScoreIds = await _tempGameSessionRepository.GetQuestionOf10Score(guid);
 
@@ -90,9 +94,8 @@ namespace QuizAPI.GameManager
             }
             else
             {
-                
-                await CloseGameSession(guid);
-                return Results.Ok("Closed!");
+                //await CloseGameSession(guid);
+                return Results.Ok("Finish");
             }
 
 
@@ -206,8 +209,21 @@ namespace QuizAPI.GameManager
             }
         }
 
-        public async Task CloseGameSession(string guid)
+        public async Task<IResult> CloseGameSession()
         {
+            var user = _userAccessor.UserName;
+            var userData = await _authenticationService.GetUser(user);
+            UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
+
+            if (userToDisplayDto == null)
+            {
+                return null;
+            }
+
+            var activeTable = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
+            string guid = activeTable.GameSessionId;
+
+
             //Get Game Session's Current Open Table 
             IEnumerable<QuestionsCaching> questionsToCache = await _tempGameSessionRepository.GetAll(guid);
             string questionsToCacheJson = JsonSerializer.Serialize(questionsToCache);
@@ -228,7 +244,9 @@ namespace QuizAPI.GameManager
             await _cashedGameSessions.Insert(cachedGameSessionModel);
 
             //Drop Active game session and the temp table after caching
+            await _tempGameSessionCommands.DropTempTable(guid);
             await _activeGameSessionsCommands.RemoveGameSession(guid);
+            return Results.Ok("Game session has been terminated!");
         }
 
         private static ActiveGameSession ConstructActiveGameSessionObject(int userId, string userName)

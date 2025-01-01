@@ -1,5 +1,6 @@
-@if(currentQuestion()){
+
   <div class="main-container">
+    @if(currentQuestion() && isGameFinished === false){
     <div class="w-2/4 h-20 pb-40 flex justify-between">
       <p>Your Score: 100</p>
       <p>Time left : 30:00</p>
@@ -20,7 +21,7 @@
         <div
           class="w-2/5 pb-6 pt-6 rounded-lg justify-center items-center text-center bg-green-300 text-green-800"
         >
-          <p class="mb-12">The answer was correct!</p>
+          <p class="mb-12">The answer is correct!</p>
           <app-button content="Next Question" buttonClass="main" (buttonClick)="requestNextQuestion()"/>
         </div>
 
@@ -31,10 +32,14 @@
       <div
       class="w-2/5 pb-6 pt-6 rounded-lg justify-center items-center text-center bg-red-300 text-red-800"
     >
-      <p class="mb-12">The answer was incorrect!</p>
+      <p class="mb-12">The answer is incorrect!</p>
       <app-button content="Next Question" buttonClass="main" (buttonClick)="requestNextQuestion()"/>
     </div>
     }
+  }
+  @else if(isGameFinished === true){
+    <app-finish-game-page/>
+  }
   </div>
-}
+
 
