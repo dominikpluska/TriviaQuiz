@@ -9,5 +9,6 @@ namespace QuizAPI.GameManager
         public Task<IResult> GetNextQuestion();
         public Task<IResult> CheckCorrectAnswer(AnswerDto answerDto);
         public Task<IResult> CloseGameSession();
+        public Task<IResult> CheckForActiveGameSession();
     }
 }

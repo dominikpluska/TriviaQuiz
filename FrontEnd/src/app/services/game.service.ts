@@ -8,13 +8,26 @@ import { Answer } from "../models/answer.model";
 export class GameService{
     private httpClient: HttpClient = inject(HttpClient);
 
-    requestGameSession(numberOfQuestions : number){
-         return this.httpClient.get('https://localhost:7500/GetGameSession?numberOfQuestions=' + numberOfQuestions).pipe(
-              catchError((error) => {
-                const errorMessage = error.error;
-                return throwError(() => new Error(errorMessage));
-              })
-            );
+    requestGameSession(numberOfQuestions? : number){
+        if(numberOfQuestions !== undefined)
+        {
+          return this.httpClient.get('https://localhost:7500/GetGameSession?numberOfQuestions=' + numberOfQuestions).pipe(
+            catchError((error) => {
+              const errorMessage = error.error;
+              return throwError(() => new Error(errorMessage));
+            })
+          );
+        }
+        else{
+          console.log('test')
+          return this.httpClient.get('https://localhost:7500/RestartGameSession').pipe(
+            catchError((error) => {
+              const errorMessage = error.error;
+              return throwError(() => new Error(errorMessage));
+            })
+          );
+        }
+        
     }
 
     getActiveQuestion(){
@@ -26,6 +39,16 @@ export class GameService{
           );
     }
 
+    checkForActiveGameSession(){
+      return this.httpClient.get<boolean>('https://localhost:7500/CheckForActiveGameSession').pipe(
+          catchError((error) => {
+            const errorMessage = error.error;
+            return throwError(() => new Error(errorMessage));
+          })
+        );
+  }
+
+    
     postAnswer(answer : Answer){
       return this.httpClient.post('https://localhost:7500/CheckCorrectAnswer', answer).pipe(
         catchError((error) => {

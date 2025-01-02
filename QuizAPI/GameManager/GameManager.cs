@@ -101,6 +101,21 @@ namespace QuizAPI.GameManager
 
         }
 
+        public async Task<IResult> CheckForActiveGameSession()
+        {
+            var currentUser = _userAccessor.UserName;
+            var activeGameSession = await _activeGameSessionsRepository.GetActiveGameSession(currentUser);
+
+            if (activeGameSession != null) 
+            {
+                return Results.Ok(true);
+            }
+            else
+            {
+                return Results.Ok(false);
+            }
+        }
+
         //Might be optimized?
         public async Task<GameSessionDto> GetGameSession(int userRequestedQuestions = 10)
         {

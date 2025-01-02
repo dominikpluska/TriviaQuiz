@@ -100,9 +100,10 @@ app.MapDelete("/DeleteQuestion/{id}", async (int id) => await questionCommands.D
 //how many questions there are left / what is the score etc. in memory. At the end the result is saved to the database.
 app.MapGet("/GetNextQuestion",  async () => await gameManager.GetNextQuestion());
 app.MapGet("/GetGameSession", async (int numberOfQuestions) => await gameManager.GetGameSession(numberOfQuestions));
+app.MapGet("/RestartGameSession", async () => await gameManager.GetGameSession());
+app.MapGet("CheckForActiveGameSession", async () => await gameManager.CheckForActiveGameSession());
 app.MapPost("/CloseGameSession", async () => await gameManager.CloseGameSession());
 app.MapPost("/CheckCorrectAnswer", async(AnswerDto answerDto) =>  await gameManager.CheckCorrectAnswer(answerDto));
-
 #endregion
 
 app.Run();

@@ -14,7 +14,7 @@ import { GameService } from '../services/game.service';
   templateUrl: './main-page.component.html',
   styleUrl: './main-page.component.css',
 })
-export class MainPageComponent  {
+export class MainPageComponent implements OnInit  {
   private router = inject(Router);
   private authenticationService = inject(AuthorizatinService);
   private destroyRef = inject(DestroyRef);
@@ -22,7 +22,35 @@ export class MainPageComponent  {
   private gameService = inject(GameService);
   public userName = this.userProfileService.getUserName;
   public displayGameOptions : boolean = false;
+  public isThereActiveGameSession : boolean = false;
   
+  ngOnInit() {
+    const subscription = this.gameService
+    .checkForActiveGameSession()
+    .pipe(
+      catchError((error) => {
+        return throwError(() => new Error(error));
+      })
+    )
+    .subscribe({
+      next: (response : boolean) => {
+        if(response === true){
+          this.isThereActiveGameSession = true;
+          console.log(response)
+        }
+        else{
+          this.isThereActiveGameSession = false;
+          console.log(response)
+        }
+        //this.router.navigate(['/game'])
+      },
+      error: (error) => {
+        console.log(error);
+      },
+    });
+  
+  this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
 
   logOut() {
     const subscription = this.authenticationService
@@ -42,7 +70,7 @@ export class MainPageComponent  {
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
-  requestGameSession(numberOfQuestions : number){
+  requestGameSession(numberOfQuestions? : number){
     const subscription = this.gameService
               .requestGameSession(numberOfQuestions)
               .pipe(
@@ -63,8 +91,13 @@ export class MainPageComponent  {
             this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
-  showGameOptions(){
-    this.displayGameOptions = true;
+  showGameOptionsOrRestartTheGame(){
+    if(this.isThereActiveGameSession === false){
+      this.displayGameOptions = true;
+    }
+    else{
+      this.requestGameSession();
+    }
   }
   hideGameOptions(){
     this.displayGameOptions = false;
