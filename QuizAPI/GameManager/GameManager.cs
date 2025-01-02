@@ -95,6 +95,7 @@ namespace QuizAPI.GameManager
             else
             {
                 //await CloseGameSession(guid);
+                await CacheGameSession(guid);
                 return Results.Ok("Finish");
             }
 
@@ -237,28 +238,7 @@ namespace QuizAPI.GameManager
 
             var activeTable = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
             string guid = activeTable.GameSessionId;
-
-
-            //Get Game Session's Current Open Table 
-            IEnumerable<QuestionsCaching> questionsToCache = await _tempGameSessionRepository.GetAll(guid);
-            string questionsToCacheJson = JsonSerializer.Serialize(questionsToCache);
-
-            //Get current game session
-            GameSessionDto activeGameSession = await _activeGameSessionsRepository.GetActiveGameSessionByGuid(guid);
-
-            CachedGameSessionModel cachedGameSessionModel = new()
-            {
-                GameSessionId = guid,
-                UserId = activeGameSession.UserId, 
-                UserName = activeGameSession.UserName, 
-                Questions = questionsToCacheJson,
-                SessionTime = activeGameSession.SessionTime,
-            };
-
-            //Insert it to the cached table
-            await _cashedGameSessions.Insert(cachedGameSessionModel);
-
-            //Drop Active game session and the temp table after caching
+            //Drop Active game session and the temp table
             await _tempGameSessionCommands.DropTempTable(guid);
             await _activeGameSessionsCommands.RemoveGameSession(guid);
             return Results.Ok("Game session has been terminated!");
@@ -275,6 +255,7 @@ namespace QuizAPI.GameManager
             return activeGameSession;
         }
 
+        //Private methods
         private static string CreateSelectQuestionsSqlStatement(int[] questionIds)
         {
             string convertedIds = "";
@@ -310,6 +291,31 @@ namespace QuizAPI.GameManager
                 randomTableName = randomTableName + alphabet[x];
             }
             return randomTableName;
+        }
+
+        private async Task CacheGameSession(string guid)
+        {
+            IEnumerable<QuestionsCaching> questionsToCache = await _tempGameSessionRepository.GetAll(guid);
+            string questionsToCacheJson = JsonSerializer.Serialize(questionsToCache);
+
+            GameSessionDto activeGameSession = await _activeGameSessionsRepository.GetActiveGameSessionByGuid(guid);
+            CachedGameSessionModel cachedGameSessionModel = new()
+            {
+                GameSessionId = guid,
+                UserId = activeGameSession.UserId,
+                UserName = activeGameSession.UserName,
+                Questions = questionsToCacheJson,
+                Score = CalculateScore(questionsToCache),
+                SessionTime = activeGameSession.SessionTime,
+            };
+
+            await _cashedGameSessions.Insert(cachedGameSessionModel);
+        }
+
+        private static int CalculateScore(IEnumerable<QuestionsCaching> questionsCaching)
+        {
+            var sumOfCorrectAnswers = questionsCaching.Where(x => x.WasAnswerCorrect == 1).Select(x => x.QuestionScore).Sum();
+            return sumOfCorrectAnswers;
         }
 
         private static List<int> GenerateRandomTable(IEnumerable<int> Ids, int numbersToSelect)
