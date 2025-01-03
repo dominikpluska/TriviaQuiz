@@ -1,28 +1,37 @@
 <div class="main-container">
   <div class="h-1/6 flex items-center justify-between">
     <app-link-button content="Go back" link="/main" />
-    <p>Total Games:</p>
+    <p>Total Games: {{playedGames.length}}</p>
   </div>
   <div
     class="h-3/4 w-full flex-col flex items-center overflow-y-auto text-center"
   >
-    <table class="table-auto w-full">
-      <thead class="mb-10 bg-slate-900">
-        <tr>
-          <th>Score</th>
-          <th>Question Count</th>
-          <th>Answered Questions</th>
-          <th>Time Played</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="bg-slate-700">
-          <td>20</td>
-          <td>255</td>
-          <td>10/20</td>
-          <td>12:12:2022</td>
-        </tr>
-      </tbody>
-    </table>
+    @if(playedGames.length > 0)
+    {
+      <table class="table-auto w-full">
+        <thead class="mb-10 bg-slate-900">
+          <tr>
+            <th>Score</th>
+            <th>Question Count</th>
+            <th>Answered Questions</th>
+            <th>Time Played</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for(item of playedGames; track item!.gameSessionId)
+          {
+            <tr class="bg-slate-700 hover:bg-slate-400">
+              <td>{{item!.score}}</td>
+              <td>{{item!.totalQuestionCount}}</td>
+              <td>{{item!.answeredQuestions}}</td>
+              <td>{{item!.sessionTime}}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+    @else {
+      <p>You have not played any games yet!</p>
+    }
   </div>
 </div>

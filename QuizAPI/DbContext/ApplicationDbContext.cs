@@ -116,6 +116,8 @@ namespace QuizAPI.DbContext
                     UserName TEXT NOT NULL,
                     Questions TEXT NOT NULL,
                     Score INT NOT NULL,
+                    AnsweredQuestions INT NOT NULL,
+                    TotalQuestionCount INT NOT NULL,
                     SessionTime TEXT NOT NULL
                 );
             ";

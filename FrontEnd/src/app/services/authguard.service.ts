@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { CanActivate } from '@angular/router';
+import { CanActivate, Router } from '@angular/router';
 import { catchError, map, Observable, of } from 'rxjs';
 import { AuthorizatinService } from './authorizationcalls.service';
 import { UserProfileService } from './userprofile.service';
@@ -10,6 +10,7 @@ import { UserProfileService } from './userprofile.service';
 export class AuthGuard implements CanActivate {
   private authorizationService = inject(AuthorizatinService);
   private userProfileService = inject(UserProfileService);
+  private router = inject(Router);
 
 
   canActivate(): Observable<boolean> {
@@ -19,6 +20,7 @@ export class AuthGuard implements CanActivate {
         return true;
       }),
       catchError((error) => {
+        this.router.navigate(['/login'])
         return of(false);
       })
     );

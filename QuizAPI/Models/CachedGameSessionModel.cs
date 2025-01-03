@@ -9,6 +9,8 @@ namespace QuizAPI.Models
         public string UserName { get; set; }
         public string Questions { get; set; }
         public int Score { get; set; }
+        public int AnsweredQuestions { get; set; }
+        public int TotalQuestionCount { get; set; }
         public string SessionTime { get; set; } 
     }
 }

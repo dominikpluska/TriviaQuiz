@@ -306,6 +306,8 @@ namespace QuizAPI.GameManager
                 UserName = activeGameSession.UserName,
                 Questions = questionsToCacheJson,
                 Score = CalculateScore(questionsToCache),
+                TotalQuestionCount = CalculateNumberOfTotalQuestions(questionsToCacheJson),
+                AnsweredQuestions = CalculateNumberOfCorrectAnswers(questionsToCacheJson),
                 SessionTime = activeGameSession.SessionTime,
             };
 
@@ -316,6 +318,19 @@ namespace QuizAPI.GameManager
         {
             var sumOfCorrectAnswers = questionsCaching.Where(x => x.WasAnswerCorrect == 1).Select(x => x.QuestionScore).Sum();
             return sumOfCorrectAnswers;
+        }
+        private static int CalculateNumberOfTotalQuestions(string jsonString)
+        {
+            var deserializeQuestions = JsonSerializer.Deserialize<IEnumerable<QuestionsCaching>>(jsonString);
+            var numberOfCorrectAnswers = deserializeQuestions!.Select(x => x.QuestionId).ToArray();
+            return numberOfCorrectAnswers.Length;
+        }
+
+        private static int CalculateNumberOfCorrectAnswers(string jsonString)
+        {
+            var deserializeQuestions = JsonSerializer.Deserialize<IEnumerable<QuestionsCaching>>(jsonString);
+            var numberOfCorrectAnswers = deserializeQuestions!.Where(x => x.WasAnswerCorrect == 1).Select(x => x.QuestionId).ToArray();
+            return numberOfCorrectAnswers.Length;
         }
 
         private static List<int> GenerateRandomTable(IEnumerable<int> Ids, int numbersToSelect)

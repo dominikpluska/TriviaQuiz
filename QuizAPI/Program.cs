@@ -7,6 +7,7 @@ using QuizAPI.GameManager;
 using QuizAPI.Models;
 using QuizAPI.Repository;
 using QuizAPI.Services;
+using QuizAPI.StatisticManager;
 using QuizAPI.UserAccessor;
 using System.Text;
 
@@ -62,6 +63,8 @@ builder.Services.AddScoped<ITempGameSessionCommands, TempGameSessionCommands>();
 builder.Services.AddScoped<ITempGameSessionRepository, TempGameSessionRepository>();
 builder.Services.AddScoped<ICashedGameSessions, CashedGameSessions>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<ICahedGameSessionRepository, CahedGameSessionRepository>();
+builder.Services.AddScoped<IStatisticManager, StatisticManager>();
 builder.Services.AddScoped<IGameManager, GameManager>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IUserAccessor, HttpUserAccessor>();
@@ -75,11 +78,13 @@ using var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 await context.CreateModel();
 
+
 var questionRepository = scope.ServiceProvider.GetRequiredService<IQuestionRepository>();
 var questionCommands = scope.ServiceProvider.GetRequiredService<IQuestionCommands>();
 var gameManager = scope.ServiceProvider.GetRequiredService<IGameManager>();
 var activeGameSession = scope.ServiceProvider.GetRequiredService<IActiveGameSessionsCommands>();
 var tempGameSessionCommands = scope.ServiceProvider.GetRequiredService<ITempGameSessionCommands>();
+var statisticsManager = scope.ServiceProvider.GetRequiredService<IStatisticManager>();
 
 
 //Clear all temp game tables
@@ -101,9 +106,15 @@ app.MapDelete("/DeleteQuestion/{id}", async (int id) => await questionCommands.D
 app.MapGet("/GetNextQuestion",  async () => await gameManager.GetNextQuestion());
 app.MapGet("/GetGameSession", async (int numberOfQuestions) => await gameManager.GetGameSession(numberOfQuestions));
 app.MapGet("/RestartGameSession", async () => await gameManager.GetGameSession());
+
 app.MapGet("CheckForActiveGameSession", async () => await gameManager.CheckForActiveGameSession());
 app.MapPost("/CloseGameSession", async () => await gameManager.CloseGameSession());
 app.MapPost("/CheckCorrectAnswer", async(AnswerDto answerDto) =>  await gameManager.CheckCorrectAnswer(answerDto));
+#endregion
+
+#region Endpoints for Statistics Queries
+app.MapGet("/GetLastPlayedGame", async () => await statisticsManager.GetLastPlayedGame());
+app.MapGet("/GetAllPlayedGames", async () => await statisticsManager.GetAllPlayedGames());
 #endregion
 
 app.Run();

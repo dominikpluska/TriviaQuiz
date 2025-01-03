@@ -19,8 +19,8 @@ namespace QuizAPI.Commands
         public async Task<IResult> Insert(CachedGameSessionModel cachedGameSession)
         {
             using var connection = SqlConnection.CreateConnection(_connectionString);
-            var sql = $@"INSERT INTO CachedGameSessions (GameSessionId, UserId, UserName, Questions, Score, SessionTime)
-                         VALUES (@GameSessionId, @UserId, @UserName, @Questions, @Score, @SessionTime)";
+            var sql = $@"INSERT INTO CachedGameSessions (GameSessionId, UserId, UserName, Questions, Score, AnsweredQuestions, TotalQuestionCount, SessionTime)
+                         VALUES (@GameSessionId, @UserId, @UserName, @Questions, @Score, @AnsweredQuestions, @TotalQuestionCount, @SessionTime)";
             await connection.ExecuteAsync(sql, cachedGameSession);
             return Results.Ok("Game session has been cached!");
         }
