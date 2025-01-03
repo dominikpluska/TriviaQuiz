@@ -12,7 +12,6 @@ export class AuthGuard implements CanActivate {
   private userProfileService = inject(UserProfileService);
   private router = inject(Router);
 
-
   canActivate(): Observable<boolean> {
     return this.authorizationService.checkAuthorization().pipe(
       map((response : any) => {

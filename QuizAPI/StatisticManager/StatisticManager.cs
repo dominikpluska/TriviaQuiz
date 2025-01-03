@@ -46,15 +46,28 @@ namespace QuizAPI.StatisticManager
 
         public async Task<IResult> GetGameSessionStats(string gamesessionId)
         {
+            if(gamesessionId == null || gamesessionId == string.Empty)
+            {
+                return Results.BadRequest("GameSessionId is empty!");
+            }
             var user = _userAccessor.UserName;
             var userData = await _authenticationService.GetUser(user);
             UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
 
             var game = await _cahedGameSessionRepository.GetGameSessionStatistic(gamesessionId);
-
-            if(game.UserId == userToDisplayDto.userId)
+            CachedGameSessionDto cachedGameSessionDto = new()
             {
-                return Results.Ok(game);
+                TotalQuestionCount = game.TotalQuestionCount,
+                AnsweredQuestions = game.AnsweredQuestions,
+                GameSessionId = game.GameSessionId,
+                Score = game.Score,
+                SessionTime = game.SessionTime,
+                Questions = JsonSerializer.Deserialize<IEnumerable<QuestionsCaching>>(game.Questions)!
+            };
+
+            if (game.UserId == userToDisplayDto.userId)
+            {
+                return Results.Ok(cachedGameSessionDto);
             }
             else
             {

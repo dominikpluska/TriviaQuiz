@@ -1,0 +1,12 @@
+@if(wasAuthorized && !errorMessage)
+{
+    <p>stats-details-page works!</p>
+}
+@else if(errorMessage)
+{
+    <p>{{errorMessage}}</p>
+}
+@else 
+{
+    <p>Unauthorized!</p>
+}

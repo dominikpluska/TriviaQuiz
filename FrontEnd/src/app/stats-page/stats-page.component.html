@@ -1,4 +1,5 @@
 <div class="main-container">
+  <router-outlet></router-outlet>
   <div class="h-1/6 flex items-center justify-between">
     <app-link-button content="Go back" link="/main" />
     <p>Total Games: {{playedGames.length}}</p>
@@ -20,12 +21,12 @@
         <tbody>
           @for(item of playedGames; track item!.gameSessionId)
           {
-            <tr class="bg-slate-700 hover:bg-slate-400" (click)="openCachedGameSession(item!.gameSessionId)">
-              <td>{{item!.score}}</td>
-              <td>{{item!.totalQuestionCount}}</td>
-              <td>{{item!.answeredQuestions}}</td>
-              <td>{{item!.sessionTime}}</td>
-            </tr>
+              <tr class="bg-slate-700 hover:bg-slate-400" (click)="openCachedGameSession(item!.gameSessionId)">
+                <td>{{item!.score}}</td>
+                <td>{{item!.totalQuestionCount}}</td>
+                <td>{{item!.answeredQuestions}}</td>
+                <td>{{item!.sessionTime}}</td>
+              </tr>
           }
         </tbody>
       </table>
@@ -33,5 +34,6 @@
     @else {
       <p>You have not played any games yet!</p>
     }
+    
   </div>
 </div>

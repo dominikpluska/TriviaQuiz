@@ -7,6 +7,7 @@ import { AccountPageComponent } from './account-page/account-page.component';
 import { QuestionPageComponent } from './question-page/question-page.component';
 import { StatsPageComponent } from './stats-page/stats-page.component';
 import { AuthGuard } from './services/authguard.service';
+import { StatsDetailsPageComponent } from './stats-page/stats-details-page/stats-details-page.component';
 
 export const routes: Routes = [
   {
@@ -43,7 +44,17 @@ export const routes: Routes = [
   },
   {
     path: 'stats',
-    component: StatsPageComponent,
+    children: [
+      {
+        path: '',
+        component: StatsPageComponent, 
+      },
+      {
+      path: 'details',
+      component: StatsDetailsPageComponent, 
+      
+      }
+    ],
     canActivate: [AuthGuard],
   },
 ];

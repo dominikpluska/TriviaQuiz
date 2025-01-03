@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { catchError, throwError } from "rxjs";
 import { LastPlayedGameResult } from "../models/lastplayedgameresults.model";
 import { CachedGameSessionList } from "../models/cachedgamesessionlist.model";
+import { CachedGameSession } from "../models/cachedGameSession.model";
 
 @Injectable({providedIn: 'root'})
 export class StatisticsService{
@@ -27,7 +28,7 @@ export class StatisticsService{
   }
 
   getGameSessionStat(gameSessionId : string){
-    return this.httpClient.get('https://localhost:7500/GetGameSessionStats?gameSessionId=' + gameSessionId).pipe(
+    return this.httpClient.get<CachedGameSession>('https://localhost:7500/GetGameSessionStats?gameSessionId=' + gameSessionId).pipe(
       catchError((error) => {
         const errorMessage = error.error;
         return throwError(() => new Error(errorMessage));
