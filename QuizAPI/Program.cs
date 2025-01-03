@@ -115,6 +115,7 @@ app.MapPost("/CheckCorrectAnswer", async(AnswerDto answerDto) =>  await gameMana
 #region Endpoints for Statistics Queries
 app.MapGet("/GetLastPlayedGame", async () => await statisticsManager.GetLastPlayedGame());
 app.MapGet("/GetAllPlayedGames", async () => await statisticsManager.GetAllPlayedGames());
+app.MapGet("/GetGameSessionStats", async (string gameSessionId) => await statisticsManager.GetGameSessionStats(gameSessionId));
 #endregion
 
 app.Run();

@@ -6,5 +6,6 @@ namespace QuizAPI.Repository
     {
         public Task<CachedGameModel> GetLastGameStatisticsAsync(int userId);
         public Task<IEnumerable<CachedGameModelExtended>> GetListOfPlayedGames(int userId);
+        public Task<CachedGameSessionModel> GetGameSessionStatistic(string gameSessionId);
     }
 }

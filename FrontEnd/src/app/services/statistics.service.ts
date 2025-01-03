@@ -6,18 +6,18 @@ import { CachedGameSessionList } from "../models/cachedgamesessionlist.model";
 
 @Injectable({providedIn: 'root'})
 export class StatisticsService{
-    private httpClient = inject(HttpClient)
+  private httpClient = inject(HttpClient)
 
-    getLastPlayedGameSession(){
+  getLastPlayedGameSession(){
         return this.httpClient.get<LastPlayedGameResult>('https://localhost:7500/GetLastPlayedGame').pipe(
             catchError((error) => {
               const errorMessage = error.error;
               return throwError(() => new Error(errorMessage));
             })
           );
-    }
+  }
 
-    getGameSessionList(){
+  getGameSessionList(){
       return this.httpClient.get<[CachedGameSessionList]>('https://localhost:7500/GetAllPlayedGames').pipe(
           catchError((error) => {
             const errorMessage = error.error;
@@ -25,5 +25,15 @@ export class StatisticsService{
           })
         );
   }
+
+  getGameSessionStat(gameSessionId : string){
+    return this.httpClient.get('https://localhost:7500/GetGameSessionStats?gameSessionId=' + gameSessionId).pipe(
+      catchError((error) => {
+        const errorMessage = error.error;
+        return throwError(() => new Error(errorMessage));
+      })
+    );
+  }
+
 
 }

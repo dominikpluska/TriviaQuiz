@@ -1,5 +1,5 @@
 export interface CachedGameSessionList{
-    gameSessionId : number,
+    gameSessionId : string,
     score : number
     answeredQuestions : number
     totalQuestionCount : number

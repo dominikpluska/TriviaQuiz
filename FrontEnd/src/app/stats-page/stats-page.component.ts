@@ -33,4 +33,23 @@ export class StatsPageComponent implements OnInit {
             });
           this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
+
+  openCachedGameSession(gamesessionId : string)
+  {
+    const subscription = this.statisticsService
+            .getGameSessionStat(gamesessionId)
+            .pipe(
+              catchError((error) => {
+                return throwError(() => new Error(error));
+              })
+            )
+            .subscribe({
+              next: (response) => {
+                console.log(response)
+              },
+              error: (error) => {
+              },
+            });
+          this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
 }

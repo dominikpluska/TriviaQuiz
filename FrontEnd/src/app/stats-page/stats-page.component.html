@@ -20,7 +20,7 @@
         <tbody>
           @for(item of playedGames; track item!.gameSessionId)
           {
-            <tr class="bg-slate-700 hover:bg-slate-400">
+            <tr class="bg-slate-700 hover:bg-slate-400" (click)="openCachedGameSession(item!.gameSessionId)">
               <td>{{item!.score}}</td>
               <td>{{item!.totalQuestionCount}}</td>
               <td>{{item!.answeredQuestions}}</td>

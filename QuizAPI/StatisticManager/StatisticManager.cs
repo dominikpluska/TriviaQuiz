@@ -42,7 +42,24 @@ namespace QuizAPI.StatisticManager
 
             return Results.Ok(gamesList);
 
+        }
 
+        public async Task<IResult> GetGameSessionStats(string gamesessionId)
+        {
+            var user = _userAccessor.UserName;
+            var userData = await _authenticationService.GetUser(user);
+            UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
+
+            var game = await _cahedGameSessionRepository.GetGameSessionStatistic(gamesessionId);
+
+            if(game.UserId == userToDisplayDto.userId)
+            {
+                return Results.Ok(game);
+            }
+            else
+            {
+                return Results.Unauthorized();
+            }
         }
     }
 }

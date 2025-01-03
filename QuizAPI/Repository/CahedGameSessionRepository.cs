@@ -35,5 +35,14 @@ namespace QuizAPI.Repository
             var resutls = await connection.QueryAsync<CachedGameModelExtended>(sql);
             return resutls.ToList();
         }
+
+        public async Task<CachedGameSessionModel> GetGameSessionStatistic(string gameSessionId)
+        {
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+            var sql = $@"Select * FROM CachedGameSessions WHERE GameSessionId = '{gameSessionId}'";
+
+            var results = await connection.QueryAsync<CachedGameSessionModel>(sql);
+            return results.FirstOrDefault();
+        }
     }
 }
