@@ -55,6 +55,10 @@ namespace QuizAPI.StatisticManager
             UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
 
             var game = await _cahedGameSessionRepository.GetGameSessionStatistic(gamesessionId);
+            if(game == null)
+            {
+                return Results.BadRequest("Game Cache does not exist!");
+            }
             CachedGameSessionDto cachedGameSessionDto = new()
             {
                 TotalQuestionCount = game.TotalQuestionCount,

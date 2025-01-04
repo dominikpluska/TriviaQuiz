@@ -19,7 +19,12 @@ export class StatsDetailsPageComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
-    const subscription = this.statisticsService
+    if(this.gameSessionId() === '')
+    {
+      this.errorMessage = 'GameSessionId is empty!';
+    }
+    else{
+      const subscription = this.statisticsService
           .getGameSessionStat(this.gameSessionId())
           .pipe(
             catchError((error) => {
@@ -35,5 +40,6 @@ export class StatsDetailsPageComponent implements OnInit {
             },
           });
         this.destroyRef.onDestroy(() => subscription.unsubscribe());
+    }
   }
 }
