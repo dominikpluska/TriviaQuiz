@@ -1,6 +1,37 @@
+<app-link-button content="Go back" link="/stats" />
 @if(wasAuthorized && !errorMessage)
 {
-    <p>stats-details-page works!</p>
+    <div class="mt-12 flex items-center justify-between" (click)="Test()">
+        <p>Score: {{this.cachedGameSession?.score}}</p>
+        <p>Answered Questions: {{this.cachedGameSession?.answeredQuestions}} / {{this.cachedGameSession?.totalQuestionCount}}</p>
+        <p>Session Time: {{this.cachedGameSession?.sessionTime}}</p>
+    </div>
+    <div
+    class="h-3/4 w-full flex-col flex items-center overflow-y-auto text-center"
+    >
+    <table class="table-auto w-full mt-12">
+        <thead class="mb-10 bg-slate-900">
+          <tr>
+            <th>Question Title</th>
+            <th>Correct Answer</th>
+            <th>Was Correct</th>
+            <th>Question Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for(item of cachedGameSession?.questions; track item!.questionId)
+          {
+              <tr class="bg-slate-700 hover:bg-slate-400">
+                <td>{{item!.questionTitle}}</td>
+                <td>{{item!.correctAnswer}}</td>
+                <td>{{item!.wasAnswerCorrect}}</td>
+                <td>{{item!.questionScore}}</td>
+              </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    
 }
 @else if(errorMessage)
 {

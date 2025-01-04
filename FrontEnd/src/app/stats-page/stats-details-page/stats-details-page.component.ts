@@ -1,24 +1,29 @@
-import { Component, DestroyRef, inject, input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, inject, input, NgZone, OnInit, signal } from '@angular/core';
 import { StatisticsService } from '../../services/statistics.service';
 import { catchError, throwError } from 'rxjs';
 import { CachedGameSession } from '../../models/cachedGameSession.model';
+import { LinkButtonComponent } from "../../global-components/link-button/link-button.component";
 
 @Component({
   selector: 'app-stats-details-page',
   standalone: true,
-  imports: [],
+  imports: [LinkButtonComponent],
   templateUrl: './stats-details-page.component.html',
   styleUrl: './stats-details-page.component.css'
 })
 export class StatsDetailsPageComponent implements OnInit {
   gameSessionId = input.required<string>();
   wasAuthorized : boolean = true;
-  cachedGameSession? : CachedGameSession;
+  cachedGameSession? : CachedGameSession | null;
   errorMessage? : string;
   private statisticsService = inject(StatisticsService);
   private destroyRef = inject(DestroyRef);
 
-  ngOnInit(): void {
+  Test(){
+    console.log(this.cachedGameSession?.questions)
+  }
+
+  ngOnInit() {
     if(this.gameSessionId() === '')
     {
       this.errorMessage = 'GameSessionId is empty!';
@@ -34,6 +39,7 @@ export class StatsDetailsPageComponent implements OnInit {
           .subscribe({
             next: (response : CachedGameSession) => {
               this.cachedGameSession = response;
+              console.log(response)
             },
             error: (error) => {
               this.errorMessage = error;

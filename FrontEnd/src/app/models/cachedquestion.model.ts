@@ -1,13 +1,13 @@
 export interface CachedQuestion{
-    QuestionId : number
-    QuestionTitle : string
-    QuestionDescription : string
-    QuestionCategory : string
-    OptionA : string
-    OptionB : string
-    OptionC : string
-    OptionD : string
-    CorrectAnswer : string
-    QuestionScore : number
-    WasAnswerCorrect : number
+    questionId : number
+    questionTitle : string
+    questionDescription : string
+    questionCategory : string
+    optionA : string
+    optionB : string
+    optionC : string
+    optionD : string
+    correctAnswer : string
+    questionScore : number
+    wasAnswerCorrect : number
 }
