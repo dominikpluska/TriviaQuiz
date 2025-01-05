@@ -9,5 +9,6 @@ namespace AuthAPI.Repository
         public Task<UserToDisplayDto> GetUser(int id);
         public Task<User> GetUser(string username);
         public Task<string> GetUserEmail(string email);
+        public Task<UserNameAndMailDto> GetUserNameAndMail(int userId);
     }
 }

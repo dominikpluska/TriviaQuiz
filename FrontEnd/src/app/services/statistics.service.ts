@@ -5,6 +5,7 @@ import { LastPlayedGameResult } from "../models/lastplayedgameresults.model";
 import { CachedGameSessionList } from "../models/cachedgamesessionlist.model";
 import { CachedGameSession } from "../models/cachedGameSession.model";
 
+
 @Injectable({providedIn: 'root'})
 export class StatisticsService{
   private httpClient = inject(HttpClient)

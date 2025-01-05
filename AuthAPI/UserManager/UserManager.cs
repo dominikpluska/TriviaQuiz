@@ -151,5 +151,23 @@ namespace AuthAPI.UserManager
             };
             return Results.Ok(userToDisplayDto);
         }
+
+        public async Task<IResult> GetUserNameAndMail()
+        {
+            var userName = _userAccessor.UserName;
+            var userToDisplayDto = await _accountsRepository.GetUser(userName);
+
+            var userNameAndEmail = await _accountsRepository.GetUserNameAndMail(userToDisplayDto.UserId);
+
+            return Results.Ok(userNameAndEmail);
+
+        }
+
+        //To be implemented
+        public async Task<IResult> ChangeUserNameAndEmail(UserNameAndMailDto userNameAndMailDto)
+        {
+            
+            return Results.Ok();
+        }
     }
 }

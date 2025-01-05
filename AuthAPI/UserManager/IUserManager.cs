@@ -9,5 +9,7 @@ namespace AuthAPI.UserManager
         public IResult CheckAuthentication();
         public IResult Logout();
         public Task<IResult> GetUser(string userName);
+        public Task<IResult> GetUserNameAndMail();
+        public Task<IResult> ChangeUserNameAndEmail(UserNameAndMailDto userNameAndMailDto);
     }
 }

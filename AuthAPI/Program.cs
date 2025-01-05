@@ -96,6 +96,7 @@ app.MapPost("/Login", async (UserLoginDto userLoginDto) => await userManager.Log
 app.MapGet("/AuthCheck", () => userManager.CheckAuthentication());
 app.MapGet("/LogOut", () => userManager.Logout());
 app.MapGet("/GetUser", (string userName) => userManager.GetUser(userName));
+app.MapGet("/GetUserNameAndMail", () => userManager.GetUserNameAndMail());
 #endregion
 
 app.Run();

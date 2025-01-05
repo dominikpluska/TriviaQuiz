@@ -54,5 +54,17 @@ namespace AuthAPI.Repository
             return result.FirstOrDefault();
         }
 
+        public async Task<UserNameAndMailDto> GetUserNameAndMail(int userId)
+        {
+
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+            var sql = $@"SELECT UserName,Email FROM Accounts
+                        WHERE UserId = {userId}";
+
+            var result = await connection.QueryAsync<UserNameAndMailDto>(sql);
+
+            return result.FirstOrDefault();
+        }
+
     }
 }
