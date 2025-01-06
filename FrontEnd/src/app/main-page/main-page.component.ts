@@ -36,11 +36,9 @@ export class MainPageComponent implements OnInit  {
       next: (response : boolean) => {
         if(response === true){
           this.isThereActiveGameSession = true;
-          console.log(response)
         }
         else{
           this.isThereActiveGameSession = false;
-          console.log(response)
         }
         //this.router.navigate(['/game'])
       },

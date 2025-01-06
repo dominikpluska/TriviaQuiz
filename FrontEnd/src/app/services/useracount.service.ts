@@ -1,7 +1,8 @@
 import { inject, Injectable } from "@angular/core";
 import { HttpClient } from '@angular/common/http';
 import { catchError, throwError } from "rxjs";
-import { AccountModel } from "../models/account.model";
+import { AccountModel } from '../models/account.model';
+import {PasswordChange} from "../models/passwordchange.model";
 
 @Injectable({providedIn : 'root'})
 export class UserAccountService{
@@ -15,6 +16,25 @@ export class UserAccountService{
               }
             )
         );
+    }
 
+    updateUserNameAndEmail(accountmodel : AccountModel){
+      return this.httpClient.post('https://localhost:7501/ChangeUserNameAndEmail', accountmodel).pipe(
+        catchError((error) => {
+          const errorMessage = error.error;
+          return throwError(() => new Error(errorMessage.detail));
+        })
+      );
+    }
+
+    changePassword(password : PasswordChange){
+      console.log(password)
+      return this.httpClient.post('https://localhost:7501/ChangeUserPassword', password).pipe(
+        catchError((error) => {
+          console.log(error)
+          const errorMessage = error.error;
+          return throwError(() => new Error(errorMessage.detail));
+        })
+      );
     }
 }

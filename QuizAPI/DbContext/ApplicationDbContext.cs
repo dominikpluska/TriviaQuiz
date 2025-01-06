@@ -99,21 +99,19 @@ namespace QuizAPI.DbContext
                 QuizResults (
                     ResultId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
                     GameSessionId TEXT NOT NULL,
-                    UserName TEXT NOT NULL, 
+                    UserId INT NOT NULL,
                     GameResults TEXT NOT NULL
                     );
                CREATE TABLE IF NOT EXISTS 
                ActiveGameSessions(
                     GameSessionId TEXT NOT NULL UNIQUE,
                     UserId INT NOT NULL, 
-                    UserName TEXT NOT NULL,
                     SessionTime TEXT NOT NULL
                 );
                CREATE TABLE IF NOT EXISTS 
                CachedGameSessions(
                     GameSessionId TEXT NOT NULL UNIQUE,
                     UserId INT NOT NULL, 
-                    UserName TEXT NOT NULL,
                     Questions TEXT NOT NULL,
                     Score INT NOT NULL,
                     AnsweredQuestions INT NOT NULL,

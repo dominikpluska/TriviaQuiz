@@ -22,22 +22,22 @@ namespace QuizAPI.Repository
         public async Task<GameSessionDto> GetActiveGameSession(int id)
         {
             using var connection = SqlConnection.CreateConnection(_connectionString);
-            var sql = @$"SELECT GameSessionId, UserId, UserName, SessionTime 
+            var sql = @$"SELECT GameSessionId, UserId, SessionTime 
                          FROM ActiveGameSessions WHERE UserId = {id}";
             var resutls = await connection.QueryFirstOrDefaultAsync<GameSessionDto>(sql);
 
             return resutls;
         }
 
-        public async Task<GameSessionDto> GetActiveGameSession(string userName)
-        {
-            using var connection = SqlConnection.CreateConnection(_connectionString);
-            var sql = @$"SELECT GameSessionId, UserId, UserName, SessionTime 
-                         FROM ActiveGameSessions WHERE UserName = '{userName}'";
-            var resutls = await connection.QueryFirstOrDefaultAsync<GameSessionDto>(sql);
+        //public async Task<GameSessionDto> GetActiveGameSession(string userName)
+        //{
+        //    using var connection = SqlConnection.CreateConnection(_connectionString);
+        //    var sql = @$"SELECT GameSessionId, UserId, UserName, SessionTime 
+        //                 FROM ActiveGameSessions WHERE UserName = '{userName}'";
+        //    var resutls = await connection.QueryFirstOrDefaultAsync<GameSessionDto>(sql);
 
-            return resutls;
-        }
+        //    return resutls;
+        //}
 
         public async Task<IEnumerable<string>> GetAllGamesessionGuids()
         {
@@ -51,7 +51,7 @@ namespace QuizAPI.Repository
         public async Task<GameSessionDto> GetActiveGameSessionByGuid(string guid)
         {
             using var connection = SqlConnection.CreateConnection(_connectionString);
-            var sql = @$"SELECT GameSessionId, UserId, UserName, SessionTime 
+            var sql = @$"SELECT GameSessionId, UserId, SessionTime 
                          FROM ActiveGameSessions WHERE GameSessionId = '{guid}'";
             var resutls = await connection.QueryFirstOrDefaultAsync<GameSessionDto>(sql);
 

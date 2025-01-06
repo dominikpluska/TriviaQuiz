@@ -1,17 +1,46 @@
-<div>
-  <label>User Name</label>
-  <input type="text" value="{{ userAccount?.userName }}" [disabled] = "!editMode()" />
-  <label>Email</label>
-  <input type="text" value="{{ userAccount?.email }}" [disabled] = "!editMode()"  />
-  @if(!editMode())
-  {
-    <span class="grid grid-cols-2 gap-4">
-      <app-button content="Change Settings" buttonClass="main" (buttonClick)="switchEditMode()"/>
-      <app-button content="Change Password" buttonClass="secondary" />
-    </span>
-  }
-  @else 
-  {
-    <app-button content="Save changes" buttonClass="main"/>
-  }
-</div>
+
+  <div class="h-screen w-full pt-12  flex items-center flex-col">
+    @if(!displayChangePasswordForm()){
+      @if(!wasSuccessful){
+        <form [formGroup]="accountForm" class="h-3/5 w-3/5 flex flex-col rounded-lg justify-center items-center text-center bg-gray-600">
+          <h1 class="text-3xl mb-5">Change Account Settings</h1>
+          <p class="text-red-500">{{getError}}</p>
+          <label>User Name</label>
+          <input type="text" value="userName.value" formControlName="userName"/>
+          <label>Email</label>
+          <input type="text" value="email.value" formControlName="email"/>
+          @if(disabled)
+          {
+            <span class="grid grid-cols-2 gap-4" >
+              <app-button content="Change Settings" buttonClass="main" (buttonClick)="switchEditMode()"/>
+              <app-button content="Change Password" buttonClass="secondary" (buttonClick)="changeDisplayChangePasswordForm()"/>
+            </span>
+            <app-link-button link="/" content="Exit"/>
+          }
+          @else 
+          {
+            <span class="grid grid-cols-2 gap-4" >
+              <app-button content="Save changes" buttonClass="main" (buttonClick)="handleChangeUserNameAndEmail()"/>
+              <app-button content="Exit" buttonClass="secondary" (buttonClick)="resetForm()"/>
+            </span>
+          }
+        </form>
+        }
+        @else if(wasSuccessful && getError === ''){
+        <span
+            class="h-3/5 w-2/5 flex flex-col rounded-lg justify-center items-center text-center bg-green-300 text-green-800"
+        >
+          <p>Changes have been registered. Please click the button below to navitate to the main page!</p>
+          <app-link-button link="/main" content="Main Page" />
+        </span>
+      }
+    }
+    @else 
+    {
+      <app-change-password-form class="h-3/5 w-3/5 rounded-lg bg-gray-600" (goBackClick)="changeDisplayChangePasswordForm()"/>
+    }
+  </div>
+
+
+
+

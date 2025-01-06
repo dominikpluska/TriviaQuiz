@@ -35,6 +35,25 @@ namespace AuthAPI.Commands
 
             return Results.Ok($"{user.UserId} has been updated");
         }
+
+        public async Task<IResult> UpdatePassword(string password, int userId)
+        {
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+            var sql = $@"UPDATE Accounts SET PasswordHash = '{password}' where UserId = {userId}";
+            await connection.ExecuteAsync(sql);
+
+            return Results.Ok($"{userId} has been updated");
+        }
+
+        public async Task<UserNameAndMailDto> UpdateUserNameAndEmail(UserNameAndMailDto userNameAndMailDto, int userId)
+        {
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+            var sql = $@"UPDATE Accounts SET UserName = @UserName, Email = @Email where UserId = {userId}";
+            await connection.ExecuteAsync(sql, userNameAndMailDto);
+
+            return userNameAndMailDto;
+        }
+
         public async Task<IResult> Delete(int id)
         {
             using var connection = SqlConnection.CreateConnection(_connectionString);

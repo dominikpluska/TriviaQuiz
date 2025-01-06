@@ -11,5 +11,7 @@ namespace AuthAPI.UserManager
         public Task<IResult> GetUser(string userName);
         public Task<IResult> GetUserNameAndMail();
         public Task<IResult> ChangeUserNameAndEmail(UserNameAndMailDto userNameAndMailDto);
+        public Task<IResult> ChangePassword(ChangePasswordDto changePasswordDto);
+
     }
 }

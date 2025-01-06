@@ -105,7 +105,10 @@ namespace QuizAPI.GameManager
         public async Task<IResult> CheckForActiveGameSession()
         {
             var currentUser = _userAccessor.UserName;
-            var activeGameSession = await _activeGameSessionsRepository.GetActiveGameSession(currentUser);
+            var userData = await _authenticationService.GetUser(currentUser);
+            UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
+
+            var activeGameSession = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
 
             if (activeGameSession != null) 
             {
@@ -129,7 +132,6 @@ namespace QuizAPI.GameManager
                 return new GameSessionDto()
                 {
                     GameSessionId = $"There is already {allowedActiveGameSessions} active game sessions! Please try again later!",
-                    UserName = "NotAllowerd",
                 };
             }
 
@@ -189,7 +191,7 @@ namespace QuizAPI.GameManager
                 IEnumerable <Question> questionsListx2 = questionsList.ToList();
 
                 //Current work
-                var activeGameSessionObject = ConstructActiveGameSessionObject(userToDisplayDto.userId, userToDisplayDto.userName);
+                var activeGameSessionObject = ConstructActiveGameSessionObject(userToDisplayDto.userId);
 
                 //Post it to the database 
                 var result = await _activeGameSessionsCommands.InsertActiveGameSession(activeGameSessionObject);
@@ -207,7 +209,10 @@ namespace QuizAPI.GameManager
         public async Task<IResult> CheckCorrectAnswer(AnswerDto answerDto)
         {
             var currentUser = _userAccessor.UserName;
-            var activeGameSession = await _activeGameSessionsRepository.GetActiveGameSession(currentUser);
+            var userData = await _authenticationService.GetUser(currentUser);
+            UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
+
+            var activeGameSession = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
             //Check if the answer was correct
             string correctAnswer = await _tempGameSessionRepository.FindCorrectAnswer(activeGameSession.GameSessionId, answerDto.QuestionId);
 
@@ -244,11 +249,10 @@ namespace QuizAPI.GameManager
             return Results.Ok("Game session has been terminated!");
         }
 
-        private static ActiveGameSession ConstructActiveGameSessionObject(int userId, string userName)
+        private static ActiveGameSession ConstructActiveGameSessionObject(int userId)
         {
             ActiveGameSession activeGameSession = new()
             {
-                UserName = userName,
                 UserId = userId,
             };
 
@@ -303,7 +307,6 @@ namespace QuizAPI.GameManager
             {
                 GameSessionId = guid,
                 UserId = activeGameSession.UserId,
-                UserName = activeGameSession.UserName,
                 Questions = questionsToCacheJson,
                 Score = CalculateScore(questionsToCache),
                 TotalQuestionCount = CalculateNumberOfTotalQuestions(questionsToCacheJson),
@@ -355,7 +358,6 @@ namespace QuizAPI.GameManager
             {
                 GameSessionId = activeGameSession.GameSessionId,
                 UserId = activeGameSession.UserId,
-                UserName = activeGameSession.UserName,
                 SessionTime = activeGameSession.SessionTime,
             };
 

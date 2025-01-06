@@ -8,6 +8,7 @@ using AuthAPI.UserAccessor;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 
 namespace AuthAPI.UserManager
@@ -59,7 +60,6 @@ namespace AuthAPI.UserManager
         {
             var userAccount = await _accountsRepository.GetUser(userLoginDto.UserName);
 
-
             if (userAccount == null)
             {
                 return Results.NotFound("Login or Password were incorrect!");
@@ -84,26 +84,23 @@ namespace AuthAPI.UserManager
         }
 
         //To be implemented!
-        public async Task<IResult> ChangePassword(int id, string password)
+        public async Task<IResult> ChangePassword(ChangePasswordDto changePasswordDto)
         {
-            var userFromDB = await _accountsRepository.GetUser(id);
-            if (userFromDB == null)
+            var userName = _userAccessor.UserName;
+            var userToDisplayDto = await _accountsRepository.GetUser(userName);
+
+            var userAccount = await _accountsRepository.GetUser(userName);
+
+            if (!BCrypt.Net.BCrypt.Verify(changePasswordDto.OldPassword, userAccount!.PasswordHash))
             {
-                return Results.NotFound();
+                return Results.Problem("Login or Password were incorrect!");
             }
             else
             {
-                string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-                User user = new()
-                {
-                    UserName = userFromDB.UserName,
-                    PasswordHash = passwordHash,
-
-                };
-                await _accountsCommands.Update(user);
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword(changePasswordDto.NewPassword);
+                await _accountsCommands.UpdatePassword(passwordHash, userToDisplayDto.UserId);
                 return Results.Ok("Password updated");
             }
-            
         }
 
         public IResult CheckAuthentication()
@@ -163,11 +160,33 @@ namespace AuthAPI.UserManager
 
         }
 
-        //To be implemented
         public async Task<IResult> ChangeUserNameAndEmail(UserNameAndMailDto userNameAndMailDto)
         {
-            
-            return Results.Ok();
+            var userName = _userAccessor.UserName;
+            var userToDisplayDto = await _accountsRepository.GetUser(userName);
+
+            var checkIfUserExist = await _accountsRepository.GetUser(userNameAndMailDto.UserName);
+            if (checkIfUserExist != null && checkIfUserExist.UserName != userName)
+            {
+                return Results.Problem("UserName already exists! Please choose different user name");
+            }
+            var checkIfEmailIsBound = await _accountsRepository.GetUserEmail(userNameAndMailDto.Email);
+
+            if (checkIfEmailIsBound != null && checkIfEmailIsBound != userToDisplayDto!.Email)
+            {
+                return Results.Problem("This email is already bound to another account! Please choose different email!");
+            }
+
+            var userFromDb = await _accountsRepository.GetUser(userName);
+            var result = await _accountsCommands.UpdateUserNameAndEmail(userNameAndMailDto, userFromDb.UserId);
+
+            var cookieUserName = _cookieGenerator.GenerateCookie(DateTime.Now.AddHours(8));
+            var cookie = _cookieGenerator.GenerateCookie(DateTime.Now.AddHours(1));
+
+            _userAccessor.SetCookie("TriviaQuiz", _createToken.GenerateToken(userNameAndMailDto.UserName), cookie);
+            _userAccessor.SetCookie("TriviaQuizUserName", userNameAndMailDto.UserName, cookieUserName);
+
+            return Results.Ok(result);
         }
     }
 }

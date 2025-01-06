@@ -58,7 +58,6 @@ builder.Services.AddScoped<ApplicationDbContext>();
 builder.Services.AddScoped<ICreateJwtToken, CreateJwtToken>();
 builder.Services.AddScoped<IAccountsRepository, AccountsRepository>();
 builder.Services.AddScoped<IAccountsCommands, AccountsCommands>();
-builder.Services.AddScoped<IJwtCommands, JwtCommands>();
 builder.Services.AddScoped<IUserManager, UserManager>();
 builder.Services.AddScoped<IAdminManager, AdminManager>();
 builder.Services.AddScoped<ICookieGenerator, CookieGenerator>();
@@ -93,6 +92,8 @@ app.MapDelete(("/admin/DeactivateUse/{id}"), async (int id) => await adminManage
 #region UserEndpoints
 app.MapPost("/Register", async (UserDto userDto) => await userManager.RegisterNewUser(userDto));
 app.MapPost("/Login", async (UserLoginDto userLoginDto) => await userManager.Login(userLoginDto));
+app.MapPost("/ChangeUserPassword", async (ChangePasswordDto changePasswordDto) => await userManager.ChangePassword(changePasswordDto));
+app.MapPost("/ChangeUserNameAndEmail", async (UserNameAndMailDto userNameAndMailDto) => await userManager.ChangeUserNameAndEmail(userNameAndMailDto));
 app.MapGet("/AuthCheck", () => userManager.CheckAuthentication());
 app.MapGet("/LogOut", () => userManager.Logout());
 app.MapGet("/GetUser", (string userName) => userManager.GetUser(userName));

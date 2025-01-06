@@ -6,7 +6,6 @@ namespace QuizAPI.Models
     {
         public string GameSessionId { get; set; } 
         public int UserId { get; set; }
-        public string UserName { get; set; }
         public string Questions { get; set; }
         public int Score { get; set; }
         public int AnsweredQuestions { get; set; }
