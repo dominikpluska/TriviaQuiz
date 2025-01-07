@@ -1,4 +1,5 @@
-﻿using AuthAPI.HelperMethods;
+﻿using AuthAPI.Dto;
+using AuthAPI.HelperMethods;
 using AuthAPI.Models;
 using Dapper;
 using System.Data.SQLite;
@@ -8,12 +9,14 @@ namespace AuthAPI.DbContext
     public class ApplicationDbContext
     {
         private readonly string _connectionString;
+        private readonly string _defaultAdminPassword;
         private readonly IConfiguration _configuration;
 
         public ApplicationDbContext(IConfiguration configuration)
         {
             _configuration = configuration;
             _connectionString = _configuration.GetValue<string>("ConnectionStrings:DefaultConnection")!;
+            _defaultAdminPassword = _configuration.GetValue<string>("DefaultAdminPassword")!;
         }
 
         public async Task CreateModel()
@@ -48,10 +51,12 @@ namespace AuthAPI.DbContext
             var sql = $@"INSERT INTO Accounts(
                         UserName, Email, PasswordHash, IsGameMaster, IsActive)
                         VALUES (@UserName, @Email, @PasswordHash, @IsGameMaster, @IsActive)
-                        ";
+                        
+            ";
 
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(_defaultAdminPassword);
             User user = new() {
-                UserName = "GameMaster", Email = "GameMaster@gamemaster.com", PasswordHash="adawdawdawdawdawdadwadawdawdawdaw", IsActive=1, IsGameMaster=1
+                UserName = "GameMaster", Email = "GameMaster@gamemaster.com", PasswordHash= passwordHash, IsActive=1, IsGameMaster=1
             };
 
             await connection.ExecuteAsync(sql, user);

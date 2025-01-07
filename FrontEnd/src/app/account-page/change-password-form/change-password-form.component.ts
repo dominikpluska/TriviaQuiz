@@ -41,7 +41,8 @@ export class ChangePasswordFormComponent {
                         this.wasSuccessful = true;
                       },
                       error: (error) => {
-                        console.log(error)
+                        this.errorMessage = error;
+                        //console.log(error)
                       }
                     })
           this.destroyRef.onDestroy(() => subscription.unsubscribe());

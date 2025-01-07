@@ -8,6 +8,8 @@ import { QuestionPageComponent } from './question-page/question-page.component';
 import { StatsPageComponent } from './stats-page/stats-page.component';
 import { AuthGuard } from './services/authguard.service';
 import { StatsDetailsPageComponent } from './stats-page/stats-details-page/stats-details-page.component';
+import { AdminPageComponent } from './admin-page/admin-page.component';
+import { AuthGuardAdmin } from './services/authguardadmin.service';
 
 export const routes: Routes = [
   {
@@ -57,4 +59,14 @@ export const routes: Routes = [
     ],
     canActivate: [AuthGuard],
   },
+  {
+    path: 'admin',
+    children:[
+      {
+        path: '',
+        component: AdminPageComponent
+      }
+    ],
+    canActivate: [AuthGuardAdmin],
+  }
 ];

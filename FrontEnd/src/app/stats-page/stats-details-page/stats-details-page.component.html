@@ -24,7 +24,7 @@
               <tr class="bg-slate-700 hover:bg-slate-400">
                 <td>{{item!.questionTitle}}</td>
                 <td>{{item!.correctAnswer}}</td>
-                <td>{{item!.wasAnswerCorrect}}</td>
+                <td>{{item!.wasAnswerCorrect | booltransformer}}</td>
                 <td>{{item!.questionScore}}</td>
               </tr>
           }

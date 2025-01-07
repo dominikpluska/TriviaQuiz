@@ -21,6 +21,7 @@ export class MainPageComponent implements OnInit  {
   private userProfileService = inject(UserProfileService);
   private gameService = inject(GameService);
   public userName = this.userProfileService.getUserName;
+  public isAdmin = this.userProfileService.getIsAdmin;
   public displayGameOptions : boolean = false;
   public isThereActiveGameSession : boolean = false;
   
@@ -100,4 +101,6 @@ export class MainPageComponent implements OnInit  {
   hideGameOptions(){
     this.displayGameOptions = false;
   }
+
+  
 }

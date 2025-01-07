@@ -7,7 +7,7 @@ import { UserProfileService } from './userprofile.service';
 @Injectable({
   providedIn: 'root',
 })
-export class AuthGuard implements CanActivate {
+export class AuthGuardAdmin implements CanActivate {
   private authorizationService = inject(AuthorizatinService);
   private userProfileService = inject(UserProfileService);
   private router = inject(Router);
@@ -17,7 +17,12 @@ export class AuthGuard implements CanActivate {
       map((response : any) => {
         this.userProfileService.updateIsAdmin(response.isGameMaster);
         this.userProfileService.updateUserName(response.user);
-        return true;
+        if(response.isGameMaster === 1){
+            return true;
+        }
+        else{
+            return false;
+        }
       }),
       catchError((error) => {
         this.router.navigate(['/login'])
@@ -25,7 +30,5 @@ export class AuthGuard implements CanActivate {
       })
     );
   }
+
 }
-
-
-

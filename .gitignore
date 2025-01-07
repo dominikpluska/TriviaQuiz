@@ -364,3 +364,5 @@ FodyWeavers.xsd
 
 # Ignore all DataBases
 *.db
+/TriviaQuiz.sln
+/AuthAPI/Users.db

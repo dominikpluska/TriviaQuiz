@@ -53,6 +53,7 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
+
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<ApplicationDbContext>();
 builder.Services.AddScoped<ICreateJwtToken, CreateJwtToken>();

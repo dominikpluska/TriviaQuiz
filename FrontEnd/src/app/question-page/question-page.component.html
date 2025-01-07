@@ -2,8 +2,9 @@
   <div class="main-container">
     @if(currentQuestion() && isGameFinished === false){
     <div class="w-2/4 h-20 pb-40 flex justify-between">
-      <p>Your Score: 100</p>
-      <p>Time left : 30:00</p>
+      <app-button buttonClass="main" content="Close game session" (buttonClick)="closeGameSession()"/>
+      <!-- The line below must be changed! -->
+      <p>Time left : 30:00</p> 
     </div>
     @if(wasCorrect === 'empty')
     {

@@ -3,11 +3,12 @@ import { StatisticsService } from '../../services/statistics.service';
 import { catchError, throwError } from 'rxjs';
 import { CachedGameSession } from '../../models/cachedGameSession.model';
 import { LinkButtonComponent } from "../../global-components/link-button/link-button.component";
+import { BoolTransformerPipe } from '../../custom-pipes/booltransformer.pipe';
 
 @Component({
   selector: 'app-stats-details-page',
   standalone: true,
-  imports: [LinkButtonComponent],
+  imports: [LinkButtonComponent, BoolTransformerPipe],
   templateUrl: './stats-details-page.component.html',
   styleUrl: './stats-details-page.component.css'
 })

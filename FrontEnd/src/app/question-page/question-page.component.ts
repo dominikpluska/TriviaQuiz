@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import { QuestionButtonComponent } from './question-button/question-button.component';
 import { QuestionTextComponent } from './question-text/question-text.component';
 import { GameService } from '../services/game.service';
@@ -7,6 +7,7 @@ import { Question } from '../models/question.model';
 import { Answer } from '../models/answer.model';
 import { ButtonComponent } from "../global-components/button/button.component";
 import { FinishGamePageComponent } from "./finish-game-page/finish-game-page.component";
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-question-page',
@@ -19,6 +20,7 @@ export class QuestionPageComponent implements OnInit {
   private gameService = inject(GameService);
   private destroyRef = inject(DestroyRef);
   private selectedAnswer : Answer = {Answer : "", QuestionId : 0};
+  private router = inject(Router);
   currentQuestion = signal<any>(null);
   wasCorrect : string = 'empty';
   isGameFinished : boolean = false;
@@ -95,5 +97,24 @@ export class QuestionPageComponent implements OnInit {
         }
       })
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
+
+  closeGameSession(){
+    const subscription = this.gameService
+        .closeGameSession()
+        .pipe(
+          catchError((error) => {
+            return throwError(() => new Error(error));
+          })
+        )
+        .subscribe({
+          next: (response) => {
+            console.log(response)
+            this.router.navigate(['/main'])
+          },
+          error: (error) => {
+          },
+        });
+      this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 }

@@ -37,6 +37,9 @@
     content="Start Game"
     (buttonClick)="showGameOptionsOrRestartTheGame()"
   />
+  @if(isAdmin) {
+    <app-link-button link="/admin" content="Admin Center" />
+  }
   <app-link-button link="/stats" content="Statistics" />
   <app-link-button link="/account" content="Account Settings" />
   <app-button

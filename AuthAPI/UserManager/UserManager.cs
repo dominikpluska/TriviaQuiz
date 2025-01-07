@@ -93,7 +93,7 @@ namespace AuthAPI.UserManager
 
             if (!BCrypt.Net.BCrypt.Verify(changePasswordDto.OldPassword, userAccount!.PasswordHash))
             {
-                return Results.Problem("Login or Password were incorrect!");
+                return Results.Problem("Password is incorrect!");
             }
             else
             {
@@ -103,14 +103,15 @@ namespace AuthAPI.UserManager
             }
         }
 
-        public IResult CheckAuthentication()
+        public async Task<IResult> CheckAuthentication()
         {
             var token = _userAccessor.TokenString;
+            var userName = _userAccessor.UserName;
+            var userToDisplayDto = await _accountsRepository.GetUser(userName);
 
             if (token != null)
             {
-                var userName = _userAccessor.UserName;
-                return Results.Ok(new {message = "Authenticated", user = userName});
+                return Results.Ok(new {message = "Authenticated", user = userName, isGameMaster = userToDisplayDto.IsGameMaster});
             }
             else
             {
