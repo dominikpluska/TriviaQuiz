@@ -10,6 +10,10 @@ import { AuthGuard } from './services/authguard.service';
 import { StatsDetailsPageComponent } from './stats-page/stats-details-page/stats-details-page.component';
 import { AdminPageComponent } from './admin-page/admin-page.component';
 import { AuthGuardAdmin } from './services/authguardadmin.service';
+import { UsersAdminPageComponent } from './admin-page/users-admin-page/users-admin-page.component';
+import { QuestionsAdminPageComponent } from './admin-page/questions-admin-page/questions-admin-page.component';
+import { UserDetailsAdminPageComponent } from './admin-page/users-admin-page/user-details-admin-page/user-details-admin-page.component';
+import { RegisterNewUserAdminPageComponent } from './admin-page/users-admin-page/register-new-user-admin-page/register-new-user-admin-page.component';
 
 export const routes: Routes = [
   {
@@ -49,24 +53,44 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: StatsPageComponent, 
+        component: StatsPageComponent,
       },
       {
-      path: 'details',
-      component: StatsDetailsPageComponent, 
-      
-      }
+        path: 'details',
+        component: StatsDetailsPageComponent,
+      },
     ],
     canActivate: [AuthGuard],
   },
   {
     path: 'admin',
-    children:[
+    children: [
       {
         path: '',
-        component: AdminPageComponent
-      }
+        component: AdminPageComponent,
+      },
+      {
+        path: 'users',
+        children: [
+          {
+            path: '',
+            component: UsersAdminPageComponent,
+          },
+          {
+            path: 'details',
+            component: UserDetailsAdminPageComponent,
+          },
+          {
+            path: 'register',
+            component: RegisterNewUserAdminPageComponent,
+          },
+        ],
+      },
+      {
+        path: 'questions',
+        component: QuestionsAdminPageComponent,
+      },
     ],
     canActivate: [AuthGuardAdmin],
-  }
+  },
 ];

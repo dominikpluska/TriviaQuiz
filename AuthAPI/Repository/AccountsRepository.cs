@@ -15,13 +15,14 @@ namespace AuthAPI.Repository
             _connectionString = _configuration.GetValue<string>("ConnectionStrings:DefaultConnection")!;
         }
 
-        public async Task<IEnumerable<UserToDisplayDto>> GetAll()
+        public async Task<IEnumerable<UserToDisplayDto>> GetAllUsers()
         {
             using var connection = SqlConnection.CreateConnection(_connectionString);
             var sql = $@"SELECT UserId, UserName, Email, IsGameMaster, IsActive 
-                        FROM Accounts";
+                        FROM Accounts ORDER BY UserId DESC";
 
-            return await connection.QueryAsync<UserToDisplayDto>(sql);
+            var resutls =  await connection.QueryAsync<UserToDisplayDto>(sql);
+            return resutls.ToList();
         }
 
         public async Task<UserToDisplayDto> GetUser(int id)

@@ -17,25 +17,43 @@ namespace AuthAPI.AdminManger
             
         }
 
-        public async Task<IEnumerable<UserToDisplayDto>> GetAllUsers()
+        public async Task<IResult> GetAllUsers()
         {
-           var result =  await _accountsRepository.GetAll();
-           return result.ToList();
+           var users =  await _accountsRepository.GetAllUsers();
+            return Results.Ok(users);
         }
 
-        public async Task<UserToDisplayDto> GetUserById(int id)
+        public async Task<IResult> GetUserById(int id)
         {
-            var result = await _accountsRepository.GetUser(id);
-            return result;
+            var user = await _accountsRepository.GetUser(id);
+            if(user == null)
+            {
+                return Results.Problem("User does not exist!");
+            }
+            return Results.Ok(user);
         }
 
         public async Task<IResult> AddNewUser(UserDto userDto)
         {
+            var checkIfUserExist = await _accountsRepository.GetUser(userDto.UserName);
+            if (checkIfUserExist != null)
+            {
+                return Results.Problem("UserName already exists!");
+            }
+            var checkIfEmailIsBound = await _accountsRepository.GetUserEmail(userDto.Email);
+
+            if (checkIfEmailIsBound != null)
+            {
+                return Results.Problem("This email is already bound to another account! Please contanct support for help!!");
+            }
+
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password);
             User user = new();
             user.PasswordHash = passwordHash;
             user.UserName = userDto.UserName;
             user.Email = userDto.Email;
+            user.IsGameMaster = userDto.IsGameMaster;
+            user.IsActive = userDto.IsActive;
 
             var result = await _accountsCommands.Insert(user);
             return result;

@@ -1,0 +1,36 @@
+<div class="h-screen">
+  <span class="flex justify-between pt-4">
+    <app-link-button content="Go back" link="/admin" />
+    <app-link-button content="Register New" link="/admin/users/register" />
+  </span>
+
+  <div
+    class="h-3/4 w-full flex-col flex users-center overflow-y-auto text-center"
+  >
+    <table class="table-auto w-full mt-12">
+      <thead class="mb-10 bg-slate-900">
+        <tr>
+          <th>User Name</th>
+          <th>Email</th>
+          <th>Is Game Master</th>
+          <th>Is Active</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if(userList!.length > 0){ @for(user of userList!; track user!.userId) {
+        <tr
+          class="bg-slate-700 hover:bg-slate-400"
+          (click)="openUserDetails(user!.userId)"
+        >
+          <td>{{ user!.userName }}</td>
+          <td>{{ user!.email }}</td>
+          <td>{{ user!.isGameMaster | booltransformer }}</td>
+          <td>{{ user!.isActive | booltransformer }}</td>
+        </tr>
+        } } @else {
+        <p>No users to display!</p>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

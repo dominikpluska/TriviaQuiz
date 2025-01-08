@@ -1,8 +1,17 @@
-import { ChangeDetectorRef, Component, DestroyRef, inject, input, NgZone, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  input,
+  NgZone,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { StatisticsService } from '../../services/statistics.service';
 import { catchError, throwError } from 'rxjs';
 import { CachedGameSession } from '../../models/cachedGameSession.model';
-import { LinkButtonComponent } from "../../global-components/link-button/link-button.component";
+import { LinkButtonComponent } from '../../global-components/link-button/link-button.component';
 import { BoolTransformerPipe } from '../../custom-pipes/booltransformer.pipe';
 
 @Component({
@@ -10,43 +19,37 @@ import { BoolTransformerPipe } from '../../custom-pipes/booltransformer.pipe';
   standalone: true,
   imports: [LinkButtonComponent, BoolTransformerPipe],
   templateUrl: './stats-details-page.component.html',
-  styleUrl: './stats-details-page.component.css'
+  styleUrl: './stats-details-page.component.css',
 })
 export class StatsDetailsPageComponent implements OnInit {
   gameSessionId = input.required<string>();
-  wasAuthorized : boolean = true;
-  cachedGameSession? : CachedGameSession | null;
-  errorMessage? : string;
+  wasAuthorized: boolean = true;
+  cachedGameSession?: CachedGameSession | null;
+  errorMessage?: string;
   private statisticsService = inject(StatisticsService);
   private destroyRef = inject(DestroyRef);
 
-  Test(){
-    console.log(this.cachedGameSession?.questions)
-  }
-
   ngOnInit() {
-    if(this.gameSessionId() === '')
-    {
+    if (this.gameSessionId() === '') {
       this.errorMessage = 'GameSessionId is empty!';
-    }
-    else{
+    } else {
       const subscription = this.statisticsService
-          .getGameSessionStat(this.gameSessionId())
-          .pipe(
-            catchError((error) => {
-              return throwError(() => new Error(error));
-            })
-          )
-          .subscribe({
-            next: (response : CachedGameSession) => {
-              this.cachedGameSession = response;
-              console.log(response)
-            },
-            error: (error) => {
-              this.errorMessage = error;
-            },
-          });
-        this.destroyRef.onDestroy(() => subscription.unsubscribe());
+        .getGameSessionStat(this.gameSessionId())
+        .pipe(
+          catchError((error) => {
+            return throwError(() => new Error(error));
+          })
+        )
+        .subscribe({
+          next: (response: CachedGameSession) => {
+            this.cachedGameSession = response;
+            console.log(response);
+          },
+          error: (error) => {
+            this.errorMessage = error;
+          },
+        });
+      this.destroyRef.onDestroy(() => subscription.unsubscribe());
     }
   }
 }

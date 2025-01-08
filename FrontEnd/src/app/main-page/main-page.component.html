@@ -1,4 +1,4 @@
-<div>
+<div class="text-center flex-col flex items-center justify-center h-screen">
   @if(displayGameOptions){
     <span>
       <h1>Select number of questions</h1>
@@ -25,9 +25,9 @@
   />
     }
   @else {
-    <span>
-      <h1>Hello {{userName}}!</h1>
-      <h3>
+    <span class="pb-8">
+      <h1 class="text-3xl">Hello {{userName}}!</h1>
+      <h3 class="text-xl">
         Welcome to my little quiz game! Please press play to start or renew the
         active game session!
       </h3>

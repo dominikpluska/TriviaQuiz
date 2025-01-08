@@ -109,7 +109,7 @@ namespace AuthAPI.UserManager
             var userName = _userAccessor.UserName;
             var userToDisplayDto = await _accountsRepository.GetUser(userName);
 
-            if (token != null)
+            if (token != null && userToDisplayDto != null)
             {
                 return Results.Ok(new {message = "Authenticated", user = userName, isGameMaster = userToDisplayDto.IsGameMaster});
             }

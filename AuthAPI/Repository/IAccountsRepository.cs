@@ -5,7 +5,7 @@ namespace AuthAPI.Repository
 {
     public interface IAccountsRepository
     {
-        public Task<IEnumerable<UserToDisplayDto>> GetAll();
+        public Task<IEnumerable<UserToDisplayDto>> GetAllUsers();
         public Task<UserToDisplayDto> GetUser(int id);
         public Task<User> GetUser(string username);
         public Task<string> GetUserEmail(string email);

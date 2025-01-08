@@ -1,0 +1,74 @@
+<div class="h-screen flex items-center flex-col pt-12">
+  <form
+    class="h-3/5 w-2/5 flex flex-col rounded-lg justify-center items-center text-center bg-gray-600"
+    [formGroup]="userForm"
+  >
+    <h1 class="text-3xl mb-10">Change user settings</h1>
+    <label>Login</label>
+    <input
+      type="text"
+      formControlName="userName"
+      class="w-3/5"
+      value="userName.value"
+    />
+    <label>Email</label>
+    <input
+      type="text"
+      formControlName="email"
+      class="w-3/5"
+      value="email.value"
+    />
+    <span class="grid grid-cols-2 gap-2 mt-4">
+      <span class="flex justify-center">
+        <input
+          type="checkbox"
+          id="isActive"
+          formControlName="isActive"
+          class="w-4 h-4 accent-gray-900 bg-gray-100 border-gray-300 rounded"
+        />
+        <label
+          for="isActive"
+          class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+          >Is Active</label
+        >
+      </span>
+      <span class="flex justify-center">
+        <input
+          type="checkbox"
+          id="isAdmin"
+          formControlName="isAdmin"
+          class="w-4 h-4 accent-gray-900 bg-gray-100 border-gray-300 rounded"
+        />
+        <label
+          for="isAdmin"
+          class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+          >Is Admin</label
+        >
+      </span>
+    </span>
+    @if(disabled) {
+    <span class="grid grid-cols-2 gap-4">
+      <app-button
+        content="Change Settings"
+        buttonClass="main"
+        (buttonClick)="switchEditMode()"
+      />
+      <app-button content="Change Password" buttonClass="secondary" />
+    </span>
+    } @else {
+    <span class="grid grid-cols-2 gap-4">
+      <app-button
+        content="Save Changes"
+        buttonClass="main"
+        (buttonClick)="switchEditMode()"
+      />
+      <app-button
+        content="Discard"
+        buttonClass="secondary"
+        (buttonClick)="resetForm()"
+      />
+    </span>
+    }
+    <app-link-button content="Go back" link="/admin/users" />
+  </form>
+</div>
