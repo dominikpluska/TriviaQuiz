@@ -366,3 +366,5 @@ FodyWeavers.xsd
 *.db
 /TriviaQuiz.sln
 /AuthAPI/Users.db
+/QuizAPI/GameSessions.db
+/QuizAPI/Quiz.db
