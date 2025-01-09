@@ -26,10 +26,10 @@ namespace AuthAPI.Commands
             return Results.Ok("A new record has been created!");
         }
 
-        public async Task<IResult> Update(User user)
+        public async Task<IResult> Update(UserDto user)
         {
             using var connection = SqlConnection.CreateConnection(_connectionString);
-            var sql = $@"UPDATE Accounts SET UserName = @UserName, Email = @Email, PasswordHash = @PasswordHash, 
+            var sql = $@"UPDATE Accounts SET UserName = @UserName, Email = @Email, 
                         IsGameMaster = @IsGameMaster, IsActive = @IsActive where UserId = {user.UserId}";
             await connection.ExecuteAsync(sql, user);
 

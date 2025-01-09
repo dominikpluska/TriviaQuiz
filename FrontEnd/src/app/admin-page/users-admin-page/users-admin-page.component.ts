@@ -1,10 +1,10 @@
 import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { LinkButtonComponent } from '../../global-components/link-button/link-button.component';
-import { UsersService } from '../../services/admin-services/users.service';
 import { catchError, throwError } from 'rxjs';
 import { User } from '../../models/admin-models/user.model';
 import { BoolTransformerPipe } from '../../custom-pipes/booltransformer.pipe';
 import { Router } from '@angular/router';
+import { UserAdminService } from '../../services/admin-services/usersadmin.service';
 
 @Component({
   selector: 'app-users-admin-page',
@@ -14,7 +14,7 @@ import { Router } from '@angular/router';
   styleUrl: './users-admin-page.component.css',
 })
 export class UsersAdminPageComponent implements OnInit {
-  private usersService = inject(UsersService);
+  private usersService = inject(UserAdminService);
   private destroyRef = inject(DestroyRef);
   private router = inject(Router);
   userList!: User[];

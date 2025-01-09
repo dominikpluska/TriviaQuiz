@@ -85,7 +85,8 @@ app.MapGet(("/admin/GetAllUsers"), async () =>  await adminManager.GetAllUsers()
 app.MapGet(("/admin/GetUser/{id}"), async (int id) => await adminManager.GetUserById(id));
 app.MapPost(("/admin/AddNewUser"), async (UserDto userDto) => await adminManager.AddNewUser(userDto));
 //This needs to be changed!
-app.MapPost(("/admin/UpdateUser"), async (User user) => await adminManager.UpdateUser(user));
+app.MapPost(("/admin/UpdateUser"), async (UserDto user) => await adminManager.UpdateUser(user));
+app.MapPost(("/admin/ChangeUserPassword"), async (SetNewPasswordDto setNewPasswordDto) => await adminManager.ChangeUserPassword(setNewPasswordDto.UserId, setNewPasswordDto.Password));
 app.MapDelete(("/admin/DeleteUser/{id}"), async (int id) => await adminManager.DeleteUser(id));
 app.MapDelete(("/admin/DeactivateUse/{id}"), async (int id) => await adminManager.DeactivateUser(id));
 #endregion

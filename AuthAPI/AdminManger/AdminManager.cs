@@ -59,10 +59,34 @@ namespace AuthAPI.AdminManger
             return result;
         }
 
-        public async Task<IResult> UpdateUser(User user)
+        public async Task<IResult> UpdateUser(UserDto user)
         {
-            var result = await _accountsCommands.Update(user);
-            return result;
+            var checkIfUserExists = _accountsRepository.GetUser(user.UserId);
+            if(checkIfUserExists != null)
+            {
+                await _accountsCommands.Update(user);
+                return Results.Ok("User has been updated");
+            }
+            else
+            {
+                return Results.Problem("User not found!");
+            }
+        }
+
+        public async Task<IResult> ChangeUserPassword(int userId,  string password)
+        {
+            var checkIfUserExists = _accountsRepository.GetUser(userId);
+            if (checkIfUserExists != null)
+            {
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
+                await _accountsCommands.UpdatePassword(passwordHash, userId);
+                return Results.Ok("User has been updated");
+            }
+            else
+            {
+                return Results.Problem("User not found!");
+            }
+
         }
 
         public async Task<IResult> DeleteUser(int id)

@@ -1,6 +1,5 @@
 import { Component, DestroyRef, inject, input, OnInit } from '@angular/core';
 import { User } from '../../../models/admin-models/user.model';
-import { UsersService } from '../../../services/admin-services/users.service';
 import { catchError, throwError } from 'rxjs';
 import { ButtonComponent } from '../../../global-components/button/button.component';
 import { LinkButtonComponent } from '../../../global-components/link-button/link-button.component';
@@ -10,6 +9,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { UserAdminService } from '../../../services/admin-services/usersadmin.service';
 
 @Component({
   selector: 'app-user-details-admin-page',
@@ -23,7 +23,9 @@ export class UserDetailsAdminPageComponent implements OnInit {
   user!: User;
   errorMessage?: string;
   disabled: boolean = true;
-  private usersService = inject(UsersService);
+  wasSuccess: boolean = false;
+  changePasswordMode: boolean = false;
+  private usersService = inject(UserAdminService);
   private destroyRef = inject(DestroyRef);
 
   userForm = new FormGroup({
@@ -52,36 +54,28 @@ export class UserDetailsAdminPageComponent implements OnInit {
     ),
   });
 
+  passWordForm = new FormGroup({
+    password: new FormControl<string>('', [
+      Validators.required,
+      Validators.minLength(5),
+    ]),
+
+    confirmPassword: new FormControl<string>('', [
+      Validators.required,
+      Validators.email,
+    ]),
+  });
+
   ngOnInit() {
     if (this.userId() === null) {
       this.errorMessage = 'UserId is empty!';
     } else {
-      const subscription = this.usersService
-        .getUser(this.userId())
-        .pipe(
-          catchError((error) => {
-            return throwError(() => new Error(error));
-          })
-        )
-        .subscribe({
-          next: (response: User) => {
-            this.userForm.setValue({
-              userName: response.userName,
-              email: response.email,
-              isActive: response.isActive === 1 ? true : false,
-              isAdmin: response.isGameMaster === 1 ? true : false,
-            });
-            this.user = response;
-          },
-          error: (error) => {
-            this.errorMessage = error;
-          },
-        });
-      this.destroyRef.onDestroy(() => subscription.unsubscribe());
+      this.FetchUser();
     }
   }
 
   switchEditMode() {
+    this.errorMessage = '';
     this.disabled = !this.disabled;
     if (this.disabled === false) {
       this.userForm.controls['userName'].enable();
@@ -104,5 +98,109 @@ export class UserDetailsAdminPageComponent implements OnInit {
       isAdmin: this.user.isGameMaster === 1 ? true : false,
     });
     this.switchEditMode();
+    this.errorMessage = '';
+  }
+
+  handleUpdate() {
+    const subscription = this.usersService
+      .updateUser({
+        userId: this.user.userId,
+        userName: this.userForm.value.userName!,
+        email: this.userForm.value.email!,
+        isActive: this.userForm.value.isActive! === true ? 1 : 0,
+        isGameMaster: this.userForm.value.isAdmin! === true ? 1 : 0,
+      })
+      .pipe(
+        catchError((error) => {
+          return throwError(() => new Error(error));
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          this.wasSuccess = true;
+          this.errorMessage = '';
+        },
+        error: (error) => {
+          this.errorMessage = error;
+        },
+      });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
+
+  switchChangePasswordMode() {
+    this.changePasswordMode = !this.changePasswordMode;
+    this.errorMessage = '';
+    this.passWordForm.setValue({ password: '', confirmPassword: '' });
+  }
+
+  handleChangePassWord() {
+    if (this.CheckPasswords()) {
+      const subscription = this.usersService
+        .updatePassword(this.user.userId, this.passWordForm.value.password!)
+        .pipe(
+          catchError((error) => {
+            return throwError(() => new Error(error));
+          })
+        )
+        .subscribe({
+          next: (response) => {
+            this.wasSuccess = true;
+            this.errorMessage = '';
+            this.passWordForm.setValue({ password: '', confirmPassword: '' });
+          },
+          error: (error) => {
+            this.errorMessage = error;
+            this.wasSuccess = false;
+          },
+        });
+      this.destroyRef.onDestroy(() => subscription.unsubscribe());
+    }
+  }
+
+  ResetComponent() {
+    this.FetchUser();
+    this.wasSuccess = false;
+    this.errorMessage = '';
+  }
+
+  private FetchUser() {
+    const subscription = this.usersService
+      .getUser(this.userId())
+      .pipe(
+        catchError((error) => {
+          return throwError(() => new Error(error));
+        })
+      )
+      .subscribe({
+        next: (response: User) => {
+          this.userForm.setValue({
+            userName: response.userName,
+            email: response.email,
+            isActive: response.isActive === 1 ? true : false,
+            isAdmin: response.isGameMaster === 1 ? true : false,
+          });
+          this.user = response;
+        },
+        error: (error) => {
+          this.errorMessage = error;
+        },
+      });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
+
+  private CheckPasswords() {
+    if (
+      this.passWordForm.value.password! ==
+      this.passWordForm.value.confirmPassword
+    ) {
+      this.errorMessage = '';
+      return true;
+    } else if (this.passWordForm.value.password!.length < 5) {
+      this.errorMessage = 'Password is too short!';
+      return false;
+    } else {
+      this.errorMessage = 'Passwords do not match!';
+      return false;
+    }
   }
 }

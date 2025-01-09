@@ -1,9 +1,11 @@
 <div class="h-screen flex items-center flex-col pt-12">
+  @if(!changePasswordMode){ @if(!wasSuccess){
   <form
     class="h-3/5 w-2/5 flex flex-col rounded-lg justify-center items-center text-center bg-gray-600"
     [formGroup]="userForm"
   >
     <h1 class="text-3xl mb-10">Change user settings</h1>
+    <p class="text-red-500">{{ errorMessage }}</p>
     <label>Login</label>
     <input
       type="text"
@@ -53,14 +55,18 @@
         buttonClass="main"
         (buttonClick)="switchEditMode()"
       />
-      <app-button content="Change Password" buttonClass="secondary" />
+      <app-button
+        content="Change Password"
+        buttonClass="secondary"
+        (buttonClick)="switchChangePasswordMode()"
+      />
     </span>
     } @else {
     <span class="grid grid-cols-2 gap-4">
       <app-button
         content="Save Changes"
         buttonClass="main"
-        (buttonClick)="switchEditMode()"
+        (buttonClick)="handleUpdate()"
       />
       <app-button
         content="Discard"
@@ -71,4 +77,57 @@
     }
     <app-link-button content="Go back" link="/admin/users" />
   </form>
+  } @else {
+  <div class="h-screen w-full flex items-center flex-col pt-12">
+    <div
+      class="h-1/5 w-2/5 flex flex-col rounded-lg justify-center items-center text-center bg-green-300 text-green-800"
+    >
+      <p>Operation has been successfull!</p>
+      <app-button
+        content="Go back"
+        buttonClass="main"
+        (buttonClick)="ResetComponent()"
+      />
+      <app-link-button link="/main" content="Main Page" />
+    </div>
+  </div>
+  } } @else { @if(!wasSuccess){
+  <form
+    class="h-3/5 w-2/5 flex flex-col rounded-lg justify-center items-center text-center bg-gray-600"
+    [formGroup]="passWordForm"
+  >
+    <h1 class="text-3xl mb-10">Change user password</h1>
+    <p class="text-red-500">{{ errorMessage }}</p>
+    <label>Password</label>
+    <input type="password" formControlName="password" class="w-3/5" />
+    <label>Confirm Password</label>
+    <input type="password" formControlName="confirmPassword" class="w-3/5" />
+    <span class="grid grid-cols-2 gap-4">
+      <app-button
+        content="Save"
+        buttonClass="main"
+        (buttonClick)="handleChangePassWord()"
+      />
+      <app-button
+        content="Discard"
+        buttonClass="secondary"
+        (buttonClick)="switchChangePasswordMode()"
+      />
+    </span>
+  </form>
+  } @else {
+  <div class="h-screen w-full flex items-center flex-col pt-12">
+    <div
+      class="h-1/5 w-2/5 flex flex-col rounded-lg justify-center items-center text-center bg-green-300 text-green-800"
+    >
+      <p>Operation has been successfull!</p>
+      <app-button
+        content="Go back"
+        buttonClass="main"
+        (buttonClick)="ResetComponent()"
+      />
+      <app-link-button link="/main" content="Main Page" />
+    </div>
+  </div>
+  }}
 </div>
