@@ -1,0 +1,179 @@
+<div class="h-full flex items-center flex-col pt-44">
+  @if(!wasSuccess){
+  <form
+    [formGroup]="questionDetailsForm"
+    class="h-4/5 w-full items-center text-center"
+  >
+    <h1 class="text-3xl mb-10">Change question settings</h1>
+    <p class="text-red-500">{{ errorMessage }}</p>
+    <!-- Top Row -->
+    <span class="grid grid-cols-3" id="TopRow">
+      <span class="flex flex-col items-center">
+        <label>Question Title</label>
+        <input
+          type="text"
+          formControlName="questionTitle"
+          class="w-4/5 text-center"
+          value="questionTitle.value"
+        />
+      </span>
+      <span class="flex flex-col items-center">
+        <label>Question Category</label>
+        <input
+          type="text"
+          formControlName="questionCategory"
+          class="w-4/5 text-center"
+          value="questionCategory.value"
+        />
+      </span>
+      <span class="flex flex-col items-center">
+        <label>Question Score</label>
+        @if(disabled === true){
+        <input
+          type="text"
+          formControlName="questionScore"
+          class="w-3/5 text-center"
+          value="questionScore.value"
+        />
+        } @else {<select
+          formControlName="questionScore"
+          value="questionScore.value"
+        >
+          <option [ngValue]="10">10</option>
+          <option [ngValue]="5">5</option></select
+        >}
+      </span>
+    </span>
+    <!-- Middle Row -->
+    <span class="grid grid-cols-5" id="MiddleRow">
+      <span class="flex flex-col items-center">
+        <label>Option A</label>
+        <input
+          type="text"
+          formControlName="optionA"
+          class="w-4/5 text-center"
+          value="optionA.value"
+        />
+      </span>
+      <span class="flex flex-col items-center">
+        <label>Option B</label>
+        <input
+          type="text"
+          formControlName="optionB"
+          class="w-4/5 text-center"
+          value="optionB.value"
+        />
+      </span>
+      <span class="flex flex-col items-center">
+        <label>Option C</label>
+        <input
+          type="text"
+          formControlName="optionC"
+          class="w-4/5 text-center"
+          value="optionC.value"
+        />
+      </span>
+      <span class="flex flex-col items-center">
+        <label>Option D</label>
+        <input
+          type="text"
+          formControlName="optionD"
+          class="w-4/5 text-center"
+          value="optionD.value"
+        />
+      </span>
+      <span class="flex flex-col items-center">
+        @if(disabled === true){
+        <label>Correct Answer</label>
+        <input
+          type="text"
+          formControlName="correctAnswer"
+          class="w-4/5 text-center"
+          value="correctAnswer.value"
+        />
+        } @else {
+        <label>Correct Answer</label>
+        <select formControlName="correctAnswer" value="correctAnswer.value">
+          <option [value]="questionDetails.optionA">
+            {{ questionDetails.optionA }}
+          </option>
+          <option [value]="questionDetails.optionB">
+            {{ questionDetails.optionB }}
+          </option>
+          <option [value]="questionDetails.optionC">
+            {{ questionDetails.optionC }}
+          </option>
+          <option [value]="questionDetails.optionD">
+            {{ questionDetails.optionD }}
+          </option>
+        </select>
+        }
+      </span>
+    </span>
+    <!-- Text Area-->
+    <span>
+      <label>Question Description</label>
+      <textarea
+        type="text"
+        formControlName="questionDescription"
+        class="w-full resize-none"
+        value="questionDescription.value"
+        rows="3"
+      >
+      </textarea>
+    </span>
+    <!-- Button Row -->
+    @if(disabled === true) {
+    <span class="flex justify-center gap-3">
+      <app-button
+        content="Edit"
+        buttonClass="main"
+        (buttonClick)="switchEditMode()"
+      />
+      <app-link-button
+        content="Go Back"
+        buttonClass="main"
+        link="/admin/questions"
+      />
+    </span>
+    } @else {
+    <span class="flex justify-center gap-3">
+      <app-button
+        content="Save Changes"
+        buttonClass="main"
+        (buttonClick)="handleUpdate()"
+      />
+      <app-button
+        content="Delete"
+        buttonClass="delete"
+        (buttonClick)="handleDelete()"
+      />
+      <app-button
+        content="Discard"
+        buttonClass="secondary"
+        (buttonClick)="resetForm()"
+      />
+    </span>
+    }
+  </form>
+  } @else {
+  <div class="h-screen w-full flex items-center flex-col pt-12">
+    <div
+      class="h-1/5 w-2/5 flex flex-col rounded-lg justify-center items-center text-center bg-green-300 text-green-800"
+    >
+      <p>Operation has been successfull!</p>
+      @if(!deleteAction){
+      <app-button
+        content="Go back"
+        buttonClass="main"
+        (buttonClick)="resetForm()"
+      />
+      } @else {
+      <app-link-button link="/admin/questions" content="Question Page" />
+      }
+
+      <app-link-button link="/main" content="Main Page" />
+    </div>
+  </div>
+  }
+</div>

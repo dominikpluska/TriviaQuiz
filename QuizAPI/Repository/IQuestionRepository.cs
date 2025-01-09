@@ -7,6 +7,7 @@ namespace QuizAPI.Repository
     {
         public Task<Question> GetQuestion(int id);
         public Task<IEnumerable<Question>> GetAllQuestions();
+        public Task<IEnumerable<QuestionLightModelDto>> GetAllQuestionsLight();
         public Task<int> GetQuestionCount();
         public Task<IEnumerable<int>> GetQuestion5Score();
 

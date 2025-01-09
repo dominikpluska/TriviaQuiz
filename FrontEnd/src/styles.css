@@ -10,3 +10,13 @@ input {
   @apply mb-2 w-96 px-2 py-2 rounded-lg bg-slate-300 text-black border-2 border-gray-800;
   @apply focus:border-slate-900 focus:outline-none focus:bg-slate-500;
 }
+
+textarea {
+  @apply mb-2 w-96 px-2 py-2 rounded-lg bg-slate-300 text-black border-2 border-gray-800;
+  @apply focus:border-slate-900 focus:outline-none focus:bg-slate-500;
+}
+
+select {
+  @apply mb-2 w-96 px-2 py-2 rounded-lg bg-slate-300 text-black border-2 border-gray-800;
+  @apply focus:border-slate-900 focus:outline-none focus:bg-slate-500 text-center;
+}

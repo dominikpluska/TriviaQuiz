@@ -31,6 +31,18 @@ namespace QuizAPI.Repository
             return resutls.ToList();
         }
 
+        public async Task<IEnumerable<QuestionLightModelDto>> GetAllQuestionsLight()
+        {
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+
+            var sql = @"SELECT QuestionId,QuestionTitle,QuestionCategory,QuestionScore,CorrectAnswer 
+                    FROM Questions";
+
+            var resutls = await connection.QueryAsync<QuestionLightModelDto>(sql);
+
+            return resutls.ToList();
+        }
+
         public async Task<Question> GetQuestion(int id)
         {
             using var connection = SqlConnection.CreateConnection(_connectionString);

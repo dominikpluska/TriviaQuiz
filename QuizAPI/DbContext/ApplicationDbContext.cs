@@ -71,8 +71,10 @@ namespace QuizAPI.DbContext
                                      OptionA = "Lua", OptionB = "Go", OptionC = "Matlab", OptionD = "Mocha", CorrectAnswer = "Mocha", QuestionScore = 10},
                     new Question() { QuestionTitle = "Game Engines", QuestionDescription = "Which Game Engine Uses C# as its programming language?", QuestionCategory = "Computer Science",
                                      OptionA = "Unity", OptionB = "Unreal Engine", OptionC = "CryEngine", OptionD = "RPGMaker", CorrectAnswer = "Unity", QuestionScore = 5},
-                    new Question() { QuestionTitle = "Oiseau", QuestionDescription = "What does \"Oiseau\" mean in French?", QuestionCategory = "Languages",
+                    new Question() { QuestionTitle = "French Bird", QuestionDescription = "What does \"Oiseau\" mean in French?", QuestionCategory = "Languages",
                                      OptionA = "Fox", OptionB = "Bull", OptionC = "Bear", OptionD = "Bird", CorrectAnswer = "Bird", QuestionScore = 5},
+                    new Question() { QuestionTitle = "Test Question", QuestionDescription = "This Question is meant to be teste", QuestionCategory = "Test",
+                                     OptionA = "No", OptionB = "Option", OptionC = "Is", OptionD = "Correct", CorrectAnswer = "Option", QuestionScore = 5},
                 };
                 await connection.ExecuteAsync(sql_insert_questions, questions);
             }

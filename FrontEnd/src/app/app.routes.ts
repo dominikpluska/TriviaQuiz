@@ -14,6 +14,7 @@ import { UsersAdminPageComponent } from './admin-page/users-admin-page/users-adm
 import { QuestionsAdminPageComponent } from './admin-page/questions-admin-page/questions-admin-page.component';
 import { UserDetailsAdminPageComponent } from './admin-page/users-admin-page/user-details-admin-page/user-details-admin-page.component';
 import { RegisterNewUserAdminPageComponent } from './admin-page/users-admin-page/register-new-user-admin-page/register-new-user-admin-page.component';
+import { QuestionDetailsAdminPageComponent } from './admin-page/questions-admin-page/question-details-admin-page/question-details-admin-page.component';
 
 export const routes: Routes = [
   {
@@ -88,7 +89,16 @@ export const routes: Routes = [
       },
       {
         path: 'questions',
-        component: QuestionsAdminPageComponent,
+        children: [
+          {
+            path: '',
+            component: QuestionsAdminPageComponent,
+          },
+          {
+            path: 'details',
+            component: QuestionDetailsAdminPageComponent,
+          },
+        ],
       },
     ],
     canActivate: [AuthGuardAdmin],

@@ -10,26 +10,29 @@
     <table class="table-auto w-full mt-12">
       <thead class="mb-10 bg-slate-900">
         <tr>
-          <th>User Name</th>
-          <th>Email</th>
-          <th>Is Game Master</th>
-          <th>Is Active</th>
+          <th>Question Id</th>
+          <th>Question Title</th>
+          <th>Question Category</th>
+          <th>Question Score</th>
+          <th>Correct Answer</th>
         </tr>
       </thead>
       <tbody>
-        <!-- @if(userList!.length > 0){ @for(user of userList!; track user!.userId) {
+        @if(questionList!.length > 0){ @for(question of questionList!; track
+        question!.questionId) {
         <tr
           class="bg-slate-700 hover:bg-slate-400"
-          (click)="openUserDetails(user!.userId)"
+          (click)="selectQuestion(question!.questionId)"
         >
-          <td>{{ user!.userName }}</td>
-          <td>{{ user!.email }}</td>
-          <td>{{ user!.isGameMaster | booltransformer }}</td>
-          <td>{{ user!.isActive | booltransformer }}</td>
+          <td>{{ question!.questionId }}</td>
+          <td>{{ question!.questionTitle }}</td>
+          <td>{{ question!.questionCategory }}</td>
+          <td>{{ question!.questionScore }}</td>
+          <td>{{ question!.correctAnswer }}</td>
         </tr>
         } } @else {
         <p>No users to display!</p>
-        } -->
+        }
       </tbody>
     </table>
   </div>

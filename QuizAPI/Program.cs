@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using QuizAPI.AdminManager;
 using QuizAPI.Commands;
 using QuizAPI.DbContext;
 using QuizAPI.Dto;
@@ -68,6 +69,7 @@ builder.Services.AddScoped<IStatisticManager, StatisticManager>();
 builder.Services.AddScoped<IGameManager, GameManager>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IUserAccessor, HttpUserAccessor>();
+builder.Services.AddScoped<IAdminManager, AdminManager>();
 
 var app = builder.Build();
 app.UseCors();
@@ -85,6 +87,7 @@ var gameManager = scope.ServiceProvider.GetRequiredService<IGameManager>();
 var activeGameSession = scope.ServiceProvider.GetRequiredService<IActiveGameSessionsCommands>();
 var tempGameSessionCommands = scope.ServiceProvider.GetRequiredService<ITempGameSessionCommands>();
 var statisticsManager = scope.ServiceProvider.GetRequiredService<IStatisticManager>();
+var adminManager = scope.ServiceProvider.GetRequiredService<IAdminManager>();
 
 
 //Clear all temp game tables
@@ -94,15 +97,14 @@ await activeGameSession.TruncateActiveGameSession();
 app.MapGet("/", () => "This is Quiz API!");
 
 #region Question Endpoints for Admin Operation
-app.MapGet("/GetAllQuestions", async () => await questionRepository.GetAllQuestions());
-app.MapPost("/PostQuestion", async (Question question) => await questionCommands.Insert(question));
-app.MapPut("/UpdateQuestion/{id}", async (int id, Question question) => await questionCommands.Update(question));
-app.MapDelete("/DeleteQuestion/{id}", async (int id) => await questionCommands.Delete(id));
+app.MapGet("/admin/GetAllQuestions", async () => await adminManager.GetAllQuestions());
+app.MapGet("/admin/GetQuestionDetails/{id}", async (int id) => await adminManager.GetQuestionDetails(id));
+//app.MapPost("/PostQuestion", async (Question question) => await questionCommands.Insert(question));
+app.MapPut("/admin/UpdateQuestion/{id}", async (QuestionExtendedDto question, int id) => await adminManager.UpdateQuestion(id, question));
+app.MapDelete("/admin/DeleteQuestion/{id}", async (int id) => await adminManager.DeleteQuestion(id));
 #endregion
 
 #region Question Endpoints for Game Participants
-//User request a game session with a valid session string / id. Then the game is returned to the user. The rest is handled by a game manager which is going to keep track of 
-//how many questions there are left / what is the score etc. in memory. At the end the result is saved to the database.
 app.MapGet("/GetNextQuestion",  async () => await gameManager.GetNextQuestion());
 app.MapGet("/GetGameSession", async (int numberOfQuestions) => await gameManager.GetGameSession(numberOfQuestions));
 app.MapGet("/RestartGameSession", async () => await gameManager.GetGameSession());

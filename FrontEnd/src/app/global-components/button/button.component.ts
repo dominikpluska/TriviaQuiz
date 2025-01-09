@@ -9,8 +9,7 @@ import { Component, input, output } from '@angular/core';
 })
 export class ButtonComponent {
   content = input.required<string>();
-  //buttonType = input<string>();
-  buttonClass = input.required<'main' | 'secondary'>();
+  buttonClass = input.required<'main' | 'secondary' | 'delete'>();
   buttonClick = output<void>();
 
   onButtonLcikc() {

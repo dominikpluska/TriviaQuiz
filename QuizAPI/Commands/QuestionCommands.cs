@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SQLite;
 using Microsoft.AspNetCore.Http;
 using QuizAPI.HelperMethods;
+using QuizAPI.Dto;
 
 namespace QuizAPI.Commands
 {
@@ -57,13 +58,13 @@ namespace QuizAPI.Commands
 
         }
 
-        public async Task<IResult> Update(Question question)
+        public async Task<IResult> Update(int questionId, QuestionExtendedDto question)
         {
             using var connection = SqlConnection.CreateConnection(_connectionString);
 
-            var sql = $@"UPDATE Questions set QuestionTitle = (@QuestionTitle), QuestionDescription = (@QuestionDescription), QuestionCategory = (@QuestionCategory),
-                        OptionA = (@OptionA), OptionB = (@OptionB), OptionC = (@OptionC), OptionD = (@OptionD), CorrectAnswer = (@CorrectAnswer), QuestionScore = @QuestionScore 
-                        where QuestionId = {question.QuestionId}";
+            var sql = $@"UPDATE Questions set QuestionTitle = @QuestionTitle, QuestionDescription = @QuestionDescription, QuestionCategory = @QuestionCategory,
+                        OptionA = @OptionA, OptionB = @OptionB, OptionC = @OptionC, OptionD = @OptionD, CorrectAnswer = @CorrectAnswer, QuestionScore = @QuestionScore 
+                        where QuestionId = {questionId}";
 
             await connection.ExecuteAsync(sql, question);
 
