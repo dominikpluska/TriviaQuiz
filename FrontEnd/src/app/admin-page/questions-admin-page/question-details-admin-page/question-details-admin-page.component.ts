@@ -131,7 +131,7 @@ export class QuestionDetailsAdminPageComponent implements OnInit {
 
   handleUpdate() {
     const subscription = this.questionsAdminService
-      .updateQuestion(this.constructQuestionDetailsModel())
+      .updateQuestion(this.questionId(), this.constructQuestionDetailsModel())
       .pipe(
         catchError((error) => {
           return throwError(() => new Error(error));
@@ -172,7 +172,6 @@ export class QuestionDetailsAdminPageComponent implements OnInit {
 
   private constructQuestionDetailsModel() {
     let question: QuestionDetails = {
-      questionId: this.questionDetails.questionId,
       questionCategory: this.questionDetailsForm.value.questionCategory!,
       questionDescription: this.questionDetailsForm.value.questionDescription!,
       questionScore: this.questionDetailsForm.value.questionScore!,

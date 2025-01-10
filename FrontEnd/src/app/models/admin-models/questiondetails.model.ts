@@ -1,5 +1,4 @@
 export interface QuestionDetails {
-  questionId: number;
   questionTitle: string;
   questionDescription: string;
   questionCategory: string;

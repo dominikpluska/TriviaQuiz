@@ -72,5 +72,52 @@ namespace QuizAPI.Repository
             var getLowScoreIdsSql = "Select QuestionId  from Questions where QuestionScore = 10";
             return await connection.QueryAsync<int>(getLowScoreIdsSql);
         }
+
+        public async Task<QuestionsCount> CalculateQuestionPercentage(string randomTableName, int userRequestedQuestions)
+        {
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+            var howManyQuestionsToSelect = $@"Drop TABLE IF EXISTS {randomTableName};
+                                                Create Temp Table {randomTableName} AS
+                                                SELECT   
+	                                                 (SELECT CAST(count(*) AS REAL) FROM Questions) AS TotalQuestionCount,
+                                                     (SELECT CAST(count(*) AS REAL) FROM Questions WHERE QuestionScore = 5) AS LowerScore,   
+                                                     (SELECT CAST(count(*) AS REAL) FROM Questions WHERE QuestionScore = 10) AS HigherScore;
+                                                SELECT 
+	                                                (SELECT CAST(round(LowerScore / TotalQuestionCount, 1) * {userRequestedQuestions} AS INT)) AS LowerScorePercentage,
+	                                                (SELECT CAST(round(HigherScore / TotalQuestionCount, 1) * {userRequestedQuestions} AS INT)) AS HigherScorePercentage  From {randomTableName} ;
+                                                Drop TABLE {randomTableName};";
+            var questionsOfDifferentScoreCount = await connection.QuerySingleOrDefaultAsync<QuestionsCount>(howManyQuestionsToSelect);
+            return questionsOfDifferentScoreCount!;
+        }
+
+        public async Task<IEnumerable<Question>> GetQuestionsForQuiz(int[] questionIds)
+        {
+            using var connection = SqlConnection.CreateConnection(_connectionString);
+            var sql = CreateSelectQuestionsSqlStatement(questionIds);
+            var questionsList = await connection.QueryAsync<Question>(sql);
+            return questionsList.ToList();
+        }
+        private static string CreateSelectQuestionsSqlStatement(int[] questionIds)
+        {
+            string convertedIds = "";
+            for (int i = 0; questionIds.Length > i; i++)
+            {
+                if (i == 0)
+                {
+                    convertedIds += $"({questionIds[i]},";
+                }
+                else if (i == questionIds.Length - 1)
+                {
+                    convertedIds += $"{questionIds[i]})";
+                }
+                else
+                {
+                    convertedIds += $"{questionIds[i]},";
+                }
+            }
+
+            string sql = $"Select * from Questions where QuestionId IN {convertedIds}";
+            return sql;
+        }
     }
 }

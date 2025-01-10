@@ -4,6 +4,7 @@ using System.Data;
 using Dapper;
 using QuizAPI.Models;
 using QuizAPI.HelperMethods;
+using System.Text.Json;
 
 namespace QuizAPI.DbContext
 {
@@ -50,33 +51,8 @@ namespace QuizAPI.DbContext
                                     @OptionA, @OptionB, @OptionC, @OptionD, @CorrectAnswer, @QuestionScore);
                                     ";
 
-                //Move it to a JSON file
-                IEnumerable<Question> questions = new List<Question>
-                {
-                    new Question() { QuestionTitle = "Poland's Capital", QuestionDescription = "Which city is Poland's capital?", QuestionCategory = "Geography",
-                                     OptionA = "Poznań", OptionB = "Warszawa", OptionC = "Łódź", OptionD = "Gdańsk", CorrectAnswer = "Warszawa", QuestionScore = 5},
-                    new Question() { QuestionTitle = "Smallest European Bird", QuestionDescription = "What is the smallest European bird?", QuestionCategory = "Biology",
-                                     OptionA = "Tit", OptionB = "European robin", OptionC = "Goldcrest", OptionD = "House sparrow", CorrectAnswer = "Goldcrest", QuestionScore = 10},
-                    new Question() { QuestionTitle = "Tallest European peak", QuestionDescription = "What is the tallest European peak?", QuestionCategory = "Geography",
-                                     OptionA = "Mont Blanc", OptionB = "Shkhara", OptionC = "Mount Elbrus", OptionD = "The Matterhorn", CorrectAnswer = "Mount Elbrus", QuestionScore = 10},
-                    new Question() { QuestionTitle = "Estonia's Capital", QuestionDescription = "Which city is Estonia's capital?", QuestionCategory = "Geography",
-                                     OptionA = "Tallinn", OptionB = "Riga", OptionC = "Vilnius", OptionD = "Tartu", CorrectAnswer = "Tallinn", QuestionScore = 5},
-                    new Question() { QuestionTitle = "Europe's longest river", QuestionDescription = "What is Europe's longest river?", QuestionCategory = "Geography",
-                                     OptionA = "The Danube", OptionB = "The Volga", OptionC = "The Dnipro", OptionD = "The Belaya", CorrectAnswer = "The Volga", QuestionScore = 10},
-                    new Question() { QuestionTitle = "Bjarne Stroustrup", QuestionDescription = "Bjarne Stroustrup is a creator of which programming language?", QuestionCategory = "Computer Science",
-                                     OptionA = "Python", OptionB = "Golang", OptionC = "C++", OptionD = "Rust", CorrectAnswer = "C++", QuestionScore = 10},
-                    new Question() { QuestionTitle = "Guido van Rossum", QuestionDescription = "Guido van Rossum is a creator of which programming language?", QuestionCategory = "Computer Science",
-                                     OptionA = "Python", OptionB = "Golang", OptionC = "C++", OptionD = "Rust", CorrectAnswer = "Python", QuestionScore = 10},
-                    new Question() { QuestionTitle = "JavaScript", QuestionDescription = "What was the original name of JavaScript", QuestionCategory = "Computer Science",
-                                     OptionA = "Lua", OptionB = "Go", OptionC = "Matlab", OptionD = "Mocha", CorrectAnswer = "Mocha", QuestionScore = 10},
-                    new Question() { QuestionTitle = "Game Engines", QuestionDescription = "Which Game Engine Uses C# as its programming language?", QuestionCategory = "Computer Science",
-                                     OptionA = "Unity", OptionB = "Unreal Engine", OptionC = "CryEngine", OptionD = "RPGMaker", CorrectAnswer = "Unity", QuestionScore = 5},
-                    new Question() { QuestionTitle = "French Bird", QuestionDescription = "What does \"Oiseau\" mean in French?", QuestionCategory = "Languages",
-                                     OptionA = "Fox", OptionB = "Bull", OptionC = "Bear", OptionD = "Bird", CorrectAnswer = "Bird", QuestionScore = 5},
-                    new Question() { QuestionTitle = "Test Question", QuestionDescription = "This Question is meant to be teste", QuestionCategory = "Test",
-                                     OptionA = "No", OptionB = "Option", OptionC = "Is", OptionD = "Correct", CorrectAnswer = "Option", QuestionScore = 5},
-                };
-                await connection.ExecuteAsync(sql_insert_questions, questions);
+                var questionList = ReadQuestionsFromJsonFile();
+                await connection.ExecuteAsync(sql_insert_questions, questionList);
             }
         }
 
@@ -123,6 +99,12 @@ namespace QuizAPI.DbContext
             ";
 
             await connection.ExecuteAsync(sql);
+        }
+
+        private IEnumerable<Question> ReadQuestionsFromJsonFile()
+        {
+            var list = _configuration.GetSection("InitialQuestionsList").Get<IEnumerable<Question>>()!;
+            return list;
         }
     }
 }

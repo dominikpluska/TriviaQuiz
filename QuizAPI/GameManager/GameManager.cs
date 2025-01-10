@@ -146,9 +146,6 @@ namespace QuizAPI.GameManager
                 return checkForGameSession;
             }
 
-            //Establish connection to the sqlite database and check if the question count matches what has been requested
-            using var connection = SqlConnection.CreateConnection(_connectionString);
-
             int questionsCount = await _questionRepository.GetQuestionCount();
 
             if (questionsCount < userRequestedQuestions)
@@ -158,48 +155,21 @@ namespace QuizAPI.GameManager
             else
             {
                 string randomTableName = GenerateRandomTableName();
-
-                var howManyQuestionsToSelect = $@"Drop TABLE IF EXISTS {randomTableName};
-                                                Create Temp Table {randomTableName} AS
-                                                SELECT   
-	                                                 (SELECT CAST(count(*) AS REAL) FROM Questions) AS TotalQuestionCount,
-                                                     (SELECT CAST(count(*) AS REAL) FROM Questions WHERE QuestionScore = 5) AS LowerScore,   
-                                                     (SELECT CAST(count(*) AS REAL) FROM Questions WHERE QuestionScore = 10) AS HigherScore;
-                                                SELECT 
-	                                                (SELECT CAST(round(LowerScore / TotalQuestionCount, 1) * 10 AS INT)) AS LowerScorePercentage,
-	                                                (SELECT CAST(round(HigherScore / TotalQuestionCount, 1) * 10 AS INT)) AS HigherScorePercentage  From {randomTableName} ;
-                                                Drop TABLE {randomTableName};";
-
-                var questionsOfDifferentScoreCount = await connection.QuerySingleOrDefaultAsync<QuestionsCount>(howManyQuestionsToSelect);
-
+                var questionCount = await _questionRepository.CalculateQuestionPercentage(randomTableName, userRequestedQuestions);
                 var getLowScoreIdsSql = await _questionRepository.GetQuestion5Score();
-
-                //var getLowScoreIdsSql = "Select QuestionId  from Questions where QuestionScore = 5";
-               // var lowScoreIds = await connection.QueryAsync<int>(getLowScoreIdsSql);
-                IEnumerable<int> LowScoreQuestions = GenerateRandomTable(getLowScoreIdsSql.ToArray(), questionsOfDifferentScoreCount!.LowerScorePercentage);
-
+                IEnumerable<int> LowScoreQuestions = GenerateRandomTable(getLowScoreIdsSql.ToArray(), questionCount!.LowerScorePercentage);
 
                 var highScoreIds = await _questionRepository.GetQuestion10Score();
-                //var getHighScoreIdsSql = "Select QuestionId  from Questions where QuestionScore = 10";
-                //var highScoreIds = await connection.QueryAsync<int>(getHighScoreIdsSql);
-                IEnumerable<int> HighScoreQuestions = GenerateRandomTable(highScoreIds.ToArray(), questionsOfDifferentScoreCount!.HigherScorePercentage);
+                IEnumerable<int> HighScoreQuestions = GenerateRandomTable(highScoreIds.ToArray(), questionCount!.HigherScorePercentage);
 
                 var questionIdsList = LowScoreQuestions.Concat(HighScoreQuestions).ToArray();
+                var questionsList = await _questionRepository.GetQuestionsForQuiz(questionIdsList);
 
-                string finalSql = CreateSelectQuestionsSqlStatement(questionIdsList);
-                var questionsList = await connection.QueryAsync<Question>(finalSql);
-                IEnumerable <Question> questionsListx2 = questionsList.ToList();
+                var activeGameSessionObject = ConstructActiveGameSessionObject(userToDisplayDto.userId); 
+                await _activeGameSessionsCommands.InsertActiveGameSession(activeGameSessionObject);
 
-                //Current work
-                var activeGameSessionObject = ConstructActiveGameSessionObject(userToDisplayDto.userId);
-
-                //Post it to the database 
-                var result = await _activeGameSessionsCommands.InsertActiveGameSession(activeGameSessionObject);
-
-                //Create temp table and insert objects
                 await _tempGameSessionCommands.CreateTempTable(activeGameSessionObject.GameSessionId);
-                await _tempGameSessionCommands.InsertQuestions(questionsListx2, activeGameSessionObject.GameSessionId);
-
+                await _tempGameSessionCommands.InsertQuestions(questionsList, activeGameSessionObject.GameSessionId);
 
                 return CreateGameSessionDto(activeGameSessionObject);
             }
@@ -213,18 +183,15 @@ namespace QuizAPI.GameManager
             UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
 
             var activeGameSession = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
-            //Check if the answer was correct
             string correctAnswer = await _tempGameSessionRepository.FindCorrectAnswer(activeGameSession.GameSessionId, answerDto.QuestionId);
 
             if (correctAnswer == answerDto.Answer)
             {
-                //Mark answer as correct in the database
                 await _tempGameSessionCommands.PostAnswer(activeGameSession.GameSessionId, answerDto.QuestionId, 1);
                 return Results.Ok("Correct");
             }
             else
             {
-                //Mark answer as incorrect in the database
                 await _tempGameSessionCommands.PostAnswer(activeGameSession.GameSessionId, answerDto.QuestionId, 0);
                 return Results.Ok("Incorrect");
             }

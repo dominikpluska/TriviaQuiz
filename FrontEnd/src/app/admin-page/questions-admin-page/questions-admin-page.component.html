@@ -1,7 +1,7 @@
 <div class="h-screen">
   <span class="flex justify-between pt-4">
     <app-link-button content="Go back" link="/admin" />
-    <app-link-button content="Add New" link="" />
+    <app-link-button content="Add New" link="/admin/questions/register" />
   </span>
 
   <div
@@ -31,7 +31,7 @@
           <td>{{ question!.correctAnswer }}</td>
         </tr>
         } } @else {
-        <p>No users to display!</p>
+        <p>No questions to display!</p>
         }
       </tbody>
     </table>

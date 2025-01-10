@@ -36,7 +36,7 @@ export class StatsPageComponent implements OnInit {
   }
 
   openCachedGameSession(gamesessionId: string) {
-    this.router.navigate(['users/details'], {
+    this.router.navigate(['stats/details'], {
       queryParams: { gameSessionId: gamesessionId },
     });
   }

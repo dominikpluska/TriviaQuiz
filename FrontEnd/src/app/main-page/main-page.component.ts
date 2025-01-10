@@ -6,6 +6,7 @@ import { AuthorizatinService } from '../services/authorizationcalls.service';
 import { catchError, throwError } from 'rxjs';
 import { UserProfileService } from '../services/userprofile.service';
 import { GameService } from '../services/game.service';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-main-page',
@@ -14,7 +15,7 @@ import { GameService } from '../services/game.service';
   templateUrl: './main-page.component.html',
   styleUrl: './main-page.component.css',
 })
-export class MainPageComponent implements OnInit  {
+export class MainPageComponent implements OnInit {
   private router = inject(Router);
   private authenticationService = inject(AuthorizatinService);
   private destroyRef = inject(DestroyRef);
@@ -22,33 +23,32 @@ export class MainPageComponent implements OnInit  {
   private gameService = inject(GameService);
   public userName = this.userProfileService.getUserName;
   public isAdmin = this.userProfileService.getIsAdmin;
-  public displayGameOptions : boolean = false;
-  public isThereActiveGameSession : boolean = false;
-  
+  public displayGameOptions: boolean = false;
+  public isThereActiveGameSession: boolean = false;
+
   ngOnInit() {
     const subscription = this.gameService
-    .checkForActiveGameSession()
-    .pipe(
-      catchError((error) => {
-        return throwError(() => new Error(error));
-      })
-    )
-    .subscribe({
-      next: (response : boolean) => {
-        if(response === true){
-          this.isThereActiveGameSession = true;
-        }
-        else{
-          this.isThereActiveGameSession = false;
-        }
-        //this.router.navigate(['/game'])
-      },
-      error: (error) => {
-        console.log(error);
-      },
-    });
-  
-  this.destroyRef.onDestroy(() => subscription.unsubscribe());
+      .checkForActiveGameSession()
+      .pipe(
+        catchError((error) => {
+          return throwError(() => new Error(error));
+        })
+      )
+      .subscribe({
+        next: (response: boolean) => {
+          if (response === true) {
+            this.isThereActiveGameSession = true;
+          } else {
+            this.isThereActiveGameSession = false;
+          }
+          //this.router.navigate(['/game'])
+        },
+        error: (error) => {
+          console.log(error);
+        },
+      });
+
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
   logOut() {
@@ -69,38 +69,35 @@ export class MainPageComponent implements OnInit  {
     this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
-  requestGameSession(numberOfQuestions? : number){
+  requestGameSession(numberOfQuestions?: number) {
     const subscription = this.gameService
-              .requestGameSession(numberOfQuestions)
-              .pipe(
-                catchError((error) => {
-                  return throwError(() => new Error(error));
-                })
-              )
-              .subscribe({
-                next: (response) => {
-                  console.log(response)
-                  this.router.navigate(['/game'])
-                },
-                error: (error) => {
-                  console.log(error);
-                },
-              });
-            
-            this.destroyRef.onDestroy(() => subscription.unsubscribe());
+      .requestGameSession(numberOfQuestions)
+      .pipe(
+        catchError((error) => {
+          return throwError(() => new Error(error));
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          console.log(response);
+          this.router.navigate(['/game']);
+        },
+        error: (error) => {
+          console.log(error);
+        },
+      });
+
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 
-  showGameOptionsOrRestartTheGame(){
-    if(this.isThereActiveGameSession === false){
+  showGameOptionsOrRestartTheGame() {
+    if (this.isThereActiveGameSession === false) {
       this.displayGameOptions = true;
-    }
-    else{
+    } else {
       this.requestGameSession();
     }
   }
-  hideGameOptions(){
+  hideGameOptions() {
     this.displayGameOptions = false;
   }
-
-  
 }

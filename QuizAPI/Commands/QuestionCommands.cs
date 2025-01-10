@@ -43,7 +43,7 @@ namespace QuizAPI.Commands
             }
         }
 
-        public async Task<IResult> Insert(Question question)
+        public async Task<IResult> Insert(QuestionExtendedDto question)
         {
             using var connection = SqlConnection.CreateConnection(_connectionString);
             var sql = @"INSERT INTO Questions (

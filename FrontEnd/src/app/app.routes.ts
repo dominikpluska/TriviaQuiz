@@ -15,6 +15,7 @@ import { QuestionsAdminPageComponent } from './admin-page/questions-admin-page/q
 import { UserDetailsAdminPageComponent } from './admin-page/users-admin-page/user-details-admin-page/user-details-admin-page.component';
 import { RegisterNewUserAdminPageComponent } from './admin-page/users-admin-page/register-new-user-admin-page/register-new-user-admin-page.component';
 import { QuestionDetailsAdminPageComponent } from './admin-page/questions-admin-page/question-details-admin-page/question-details-admin-page.component';
+import { RegisterNewQuestionAdminPageComponent } from './admin-page/questions-admin-page/register-new-question-admin-page/register-new-question-admin-page.component';
 
 export const routes: Routes = [
   {
@@ -97,6 +98,10 @@ export const routes: Routes = [
           {
             path: 'details',
             component: QuestionDetailsAdminPageComponent,
+          },
+          {
+            path: 'register',
+            component: RegisterNewQuestionAdminPageComponent,
           },
         ],
       },

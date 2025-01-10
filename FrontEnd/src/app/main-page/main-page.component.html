@@ -1,44 +1,43 @@
 <div class="text-center flex-col flex items-center justify-center h-screen">
   @if(displayGameOptions){
-    <span>
-      <h1>Select number of questions</h1>
-    </span>
-    <app-button
+  <span>
+    <h1>Select number of questions</h1>
+  </span>
+  <app-button
     buttonClass="main"
     content="10"
     (buttonClick)="requestGameSession(10)"
   />
-    <app-button
+  <app-button
     buttonClass="main"
     content="20"
-    (buttonClick)="requestGameSession(10)"
+    (buttonClick)="requestGameSession(20)"
   />
-    <app-button
+  <app-button
     buttonClass="main"
     content="50"
-    (buttonClick)="requestGameSession(10)"
-    />
-    <app-button
+    (buttonClick)="requestGameSession(50)"
+  />
+  <app-button
     buttonClass="secondary"
     content="Go Back"
     (buttonClick)="hideGameOptions()"
   />
-    }
-  @else {
-    <span class="pb-8">
-      <h1 class="text-3xl">Hello {{userName}}!</h1>
-      <h3 class="text-xl">
-        Welcome to my little quiz game! Please press play to start or renew the
-        active game session!
-      </h3>
-    </span>
-    <app-button
+  } @else {
+  <span class="pb-8">
+    <h1 class="text-3xl">Hello {{ userName }}!</h1>
+    <h3 class="text-xl">
+      Welcome to my little quiz game! Please press play to start or renew the
+      active game session!
+    </h3>
+  </span>
+  <app-button
     buttonClass="main"
     content="Start Game"
     (buttonClick)="showGameOptionsOrRestartTheGame()"
   />
   @if(isAdmin) {
-    <app-link-button link="/admin" content="Admin Center" />
+  <app-link-button link="/admin" content="Admin Center" />
   }
   <app-link-button link="/stats" content="Statistics" />
   <app-link-button link="/account" content="Account Settings" />
@@ -48,5 +47,4 @@
     (buttonClick)="logOut()"
   />
   }
-  
 </div>

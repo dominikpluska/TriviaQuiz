@@ -5,7 +5,6 @@ using QuizAPI.Commands;
 using QuizAPI.DbContext;
 using QuizAPI.Dto;
 using QuizAPI.GameManager;
-using QuizAPI.Models;
 using QuizAPI.Repository;
 using QuizAPI.Services;
 using QuizAPI.StatisticManager;
@@ -13,7 +12,6 @@ using QuizAPI.UserAccessor;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 builder.Services.AddCors(options =>
 {
@@ -53,6 +51,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+
 builder.Services.AddAuthorization();
 builder.Services.AddHttpClient("Auth", x => x.BaseAddress = new Uri("https://localhost:7501"));
 builder.Services.AddScoped<ApplicationDbContext>();
@@ -80,9 +79,6 @@ using var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 await context.CreateModel();
 
-
-var questionRepository = scope.ServiceProvider.GetRequiredService<IQuestionRepository>();
-var questionCommands = scope.ServiceProvider.GetRequiredService<IQuestionCommands>();
 var gameManager = scope.ServiceProvider.GetRequiredService<IGameManager>();
 var activeGameSession = scope.ServiceProvider.GetRequiredService<IActiveGameSessionsCommands>();
 var tempGameSessionCommands = scope.ServiceProvider.GetRequiredService<ITempGameSessionCommands>();
@@ -99,7 +95,7 @@ app.MapGet("/", () => "This is Quiz API!");
 #region Question Endpoints for Admin Operation
 app.MapGet("/admin/GetAllQuestions", async () => await adminManager.GetAllQuestions());
 app.MapGet("/admin/GetQuestionDetails/{id}", async (int id) => await adminManager.GetQuestionDetails(id));
-//app.MapPost("/PostQuestion", async (Question question) => await questionCommands.Insert(question));
+app.MapPost("/admin/PostQuestion", async (QuestionExtendedDto question) => await adminManager.PostNewQuestion(question));
 app.MapPut("/admin/UpdateQuestion/{id}", async (QuestionExtendedDto question, int id) => await adminManager.UpdateQuestion(id, question));
 app.MapDelete("/admin/DeleteQuestion/{id}", async (int id) => await adminManager.DeleteQuestion(id));
 #endregion
@@ -108,7 +104,6 @@ app.MapDelete("/admin/DeleteQuestion/{id}", async (int id) => await adminManager
 app.MapGet("/GetNextQuestion",  async () => await gameManager.GetNextQuestion());
 app.MapGet("/GetGameSession", async (int numberOfQuestions) => await gameManager.GetGameSession(numberOfQuestions));
 app.MapGet("/RestartGameSession", async () => await gameManager.GetGameSession());
-
 app.MapGet("CheckForActiveGameSession", async () => await gameManager.CheckForActiveGameSession());
 app.MapPost("/CloseGameSession", async () => await gameManager.CloseGameSession());
 app.MapPost("/CheckCorrectAnswer", async(AnswerDto answerDto) =>  await gameManager.CheckCorrectAnswer(answerDto));

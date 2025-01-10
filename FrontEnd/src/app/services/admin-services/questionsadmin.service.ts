@@ -32,10 +32,22 @@ export class QuestionsAdminService {
       );
   }
 
-  updateQuestion(question: QuestionDetails) {
+  postQuestion(question: QuestionDetails) {
+    return this.httpClient
+      .post('https://localhost:7500/admin/PostQuestion', question)
+      .pipe(
+        catchError((error) => {
+          const errorMessage = error.error;
+          console.log(error);
+          return throwError(() => new Error(errorMessage.detail));
+        })
+      );
+  }
+
+  updateQuestion(questionId: number, question: QuestionDetails) {
     return this.httpClient
       .put(
-        'https://localhost:7500/admin/UpdateQuestion/' + question.questionId,
+        'https://localhost:7500/admin/UpdateQuestion/' + questionId,
         question
       )
       .pipe(

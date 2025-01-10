@@ -17,18 +17,33 @@ namespace QuizAPI.AdminManager
 
         public async Task<IResult> GetAllQuestions() 
         {
-            var restuls = await _questionRepository.GetAllQuestionsLight();
-            return Results.Ok(restuls);
+            try
+            {
+                var restuls = await _questionRepository.GetAllQuestionsLight();
+                return Results.Ok(restuls);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem($"{ex.Message}");
+            }
+
         }
 
         public async Task<IResult> GetQuestionDetails(int questionId)
         {
-            var questionDetails = await _questionRepository.GetQuestion(questionId);
-            if (questionDetails == null)
+            try
             {
-                return Results.Problem("Question does not exist!");
+                var questionDetails = await _questionRepository.GetQuestion(questionId);
+                if (questionDetails == null)
+                {
+                    return Results.Problem("Question does not exist!");
+                }
+                return Results.Ok(questionDetails);
             }
-            return Results.Ok(questionDetails);
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
 
         }
 
@@ -44,6 +59,19 @@ namespace QuizAPI.AdminManager
                 return Results.Problem(ex.Message.ToString());
             }
 
+        }
+
+        public async Task<IResult> PostNewQuestion(QuestionExtendedDto question) 
+        {
+            try
+            {
+                await _questionCommands.Insert(question);
+                return Results.Ok("Question added!");
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem($"{ex.Message}");
+            }
         }
 
         public async Task<IResult> DeleteQuestion(int questionId)
