@@ -73,7 +73,7 @@ namespace AuthAPI.UserManager
 
                 else
                 {
-                    var cookieUserName = _cookieGenerator.GenerateCookie(DateTime.Now.AddHours(8));
+                    var cookieUserName = _cookieGenerator.GenerateCookie(DateTime.Now.AddHours(1));
                     var cookie = _cookieGenerator.GenerateCookie(DateTime.Now.AddHours(1));
                     _userAccessor.SetCookie("TriviaQuiz", _createToken.GenerateToken(userAccount.UserName), cookie);
                     _userAccessor.SetCookie("TriviaQuizUserName", userAccount.UserName, cookieUserName);

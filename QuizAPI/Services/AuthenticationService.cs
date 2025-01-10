@@ -2,14 +2,18 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http.HttpResults;
+using QuizAPI.UserAccessor;
+using Newtonsoft.Json.Linq;
 
 namespace QuizAPI.Services
 {
     public class AuthenticationService: IAuthenticationService
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        public AuthenticationService(IHttpClientFactory httpClientFactory)
+        private readonly IUserAccessor _userAccessor;
+        public AuthenticationService(IHttpClientFactory httpClientFactory, IUserAccessor userAccessor)
         {
+            _userAccessor = userAccessor;
             _httpClientFactory = httpClientFactory;
         }
 
@@ -34,7 +38,9 @@ namespace QuizAPI.Services
         {
             var jsonLog = JsonSerializer.Serialize(data);
             var content = new StringContent(jsonLog, Encoding.UTF8, "application/json");
+
             var client = _httpClientFactory.CreateClient("Auth");
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _userAccessor.Token);
 
             var response = await client.GetAsync(apiPath);
             response.EnsureSuccessStatusCode();

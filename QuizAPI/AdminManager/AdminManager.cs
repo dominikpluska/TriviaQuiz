@@ -1,7 +1,10 @@
-﻿using QuizAPI.Commands;
+﻿using Microsoft.AspNetCore.Authorization;
+using QuizAPI.Commands;
 using QuizAPI.Dto;
 using QuizAPI.Models;
 using QuizAPI.Repository;
+using QuizAPI.Services;
+using QuizAPI.UserAccessor;
 
 namespace QuizAPI.AdminManager
 {
@@ -9,6 +12,7 @@ namespace QuizAPI.AdminManager
     {
         private readonly IQuestionCommands _questionCommands;
         private readonly IQuestionRepository _questionRepository;
+ 
         public AdminManager(IQuestionCommands questionCommands, IQuestionRepository questionRepository)
         {
             _questionCommands = questionCommands;

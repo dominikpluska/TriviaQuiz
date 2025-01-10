@@ -13,16 +13,16 @@ namespace AuthAPI.JwtGenerator
         private readonly string _tokenString;
         private readonly string _issuer;
         private readonly string _audience;
-        private readonly DateTime _expiryTime = new DateTime().AddHours(1);
+        private readonly DateTime _expiryTime = DateTime.Now.AddHours(1);
         private readonly IConfiguration _configuration;
 
 
         public CreateJwtToken(IConfiguration configuration)
         {
             _configuration = configuration;
-            _tokenString = _configuration.GetValue<string>("JwtSettings:TokenString");
-            _issuer = _configuration.GetValue<string>("JwtSettings:Issuer");
-            _audience = _configuration.GetValue<string>("JwtSettings:Audience");
+            _tokenString = _configuration.GetValue<string>("JwtSettings:TokenString")!;
+            _issuer = _configuration.GetValue<string>("JwtSettings:Issuer")!;
+            _audience = _configuration.GetValue<string>("JwtSettings:Audience")!;
 
         }
 
@@ -45,35 +45,6 @@ namespace AuthAPI.JwtGenerator
             var jwtToken = new JwtSecurityTokenHandler().WriteToken(token);
 
             return jwtToken;
-        }
-
-        public string DecodeToken(string token)
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var readToken = handler.ReadJwtToken(token);
-            var key = Encoding.UTF8.GetBytes(_tokenString);
-
-            //var tokenValidationParameters = new TokenValidationParameters
-            //{
-            //    ValidateIssuer = true,
-            //    ValidateAudience = true,
-            //    ValidateLifetime = true,
-            //    ValidateIssuerSigningKey = true,
-            //    ValidIssuer = _issuer,
-            //    ValidAudience = _audience,
-            //    IssuerSigningKey = new SymmetricSecurityKey(key)
-            //};
-
-
-            //var principal = handler.ValidateToken(token, tokenValidationParameters, out var validatedToken);
-
-            //if (validatedToken is JwtSecurityToken jwtTokenValidated)
-            //{
-            //    var usernameClaim = principal.FindFirst(ClaimTypes.Name);
-            //    return usernameClaim?.Value;
-            //}
-
-            return null;
         }
     }
 }

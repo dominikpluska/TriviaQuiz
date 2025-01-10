@@ -8,7 +8,8 @@
             _accessor = accessor;
         }
 
-        string IUserAccessor.UserName => _accessor.HttpContext.Request.Cookies["TriviaQuizUserName"];
+        public string Token => _accessor.HttpContext!.Request.Cookies["TriviaQuiz"]!;
+        string IUserAccessor.UserName => _accessor.HttpContext!.Request.Cookies["TriviaQuizUserName"]!;
 
     }
 }

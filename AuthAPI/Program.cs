@@ -36,15 +36,19 @@ builder.Services.AddAuthentication(options =>
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
+        ValidIssuer = builder.Configuration.GetValue<string>("JwtSettings:Issuer")!,
         ValidateIssuer = true,
+        ValidateLifetime = true,
+        ValidAudience = builder.Configuration.GetValue<string>("JwtSettings:Audience")!,
         ValidateAudience = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetValue<string>("JwtSettings:TokenString")!))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetValue<string>("JwtSettings:TokenString")!)),
+        ValidateIssuerSigningKey = true
     };
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
-            context.Request.Cookies.TryGetValue("Token", out var accessToken);
+            context.Request.Cookies.TryGetValue("TriviaQuiz", out var accessToken);
             if(!string.IsNullOrEmpty(accessToken))
             {
                 context.Token = accessToken;
@@ -81,25 +85,25 @@ var adminManager = scope.ServiceProvider.GetRequiredService<IAdminManager>();
 app.MapGet("/", () => "This is Auth API!");
 
 #region AdminEndpoints
-app.MapGet(("/admin/GetAllUsers"), async () =>  await adminManager.GetAllUsers());
-app.MapGet(("/admin/GetUser/{id}"), async (int id) => await adminManager.GetUserById(id));
-app.MapPost(("/admin/AddNewUser"), async (UserDto userDto) => await adminManager.AddNewUser(userDto));
+app.MapGet(("/admin/GetAllUsers"), async () =>  await adminManager.GetAllUsers()).RequireAuthorization();
+app.MapGet(("/admin/GetUser/{id}"), async (int id) => await adminManager.GetUserById(id)).RequireAuthorization();
+app.MapPost(("/admin/AddNewUser"), async (UserDto userDto) => await adminManager.AddNewUser(userDto)).RequireAuthorization();
 //This needs to be changed!
-app.MapPost(("/admin/UpdateUser"), async (UserDto user) => await adminManager.UpdateUser(user));
-app.MapPost(("/admin/ChangeUserPassword"), async (SetNewPasswordDto setNewPasswordDto) => await adminManager.ChangeUserPassword(setNewPasswordDto.UserId, setNewPasswordDto.Password));
-app.MapDelete(("/admin/DeleteUser/{id}"), async (int id) => await adminManager.DeleteUser(id));
-app.MapDelete(("/admin/DeactivateUse/{id}"), async (int id) => await adminManager.DeactivateUser(id));
+app.MapPost(("/admin/UpdateUser"), async (UserDto user) => await adminManager.UpdateUser(user)).RequireAuthorization();
+app.MapPost(("/admin/ChangeUserPassword"), async (SetNewPasswordDto setNewPasswordDto) => await adminManager.ChangeUserPassword(setNewPasswordDto.UserId, setNewPasswordDto.Password)).RequireAuthorization();
+app.MapDelete(("/admin/DeleteUser/{id}"), async (int id) => await adminManager.DeleteUser(id)).RequireAuthorization();
+app.MapDelete(("/admin/DeactivateUse/{id}"), async (int id) => await adminManager.DeactivateUser(id)).RequireAuthorization();
 #endregion
 
 #region UserEndpoints
 app.MapPost("/Register", async (UserDto userDto) => await userManager.RegisterNewUser(userDto));
 app.MapPost("/Login", async (UserLoginDto userLoginDto) => await userManager.Login(userLoginDto));
-app.MapPost("/ChangeUserPassword", async (ChangePasswordDto changePasswordDto) => await userManager.ChangePassword(changePasswordDto));
-app.MapPost("/ChangeUserNameAndEmail", async (UserNameAndMailDto userNameAndMailDto) => await userManager.ChangeUserNameAndEmail(userNameAndMailDto));
-app.MapGet("/AuthCheck", () => userManager.CheckAuthentication());
-app.MapGet("/LogOut", () => userManager.Logout());
-app.MapGet("/GetUser", (string userName) => userManager.GetUser(userName));
-app.MapGet("/GetUserNameAndMail", () => userManager.GetUserNameAndMail());
+app.MapPost("/ChangeUserPassword", async (ChangePasswordDto changePasswordDto) => await userManager.ChangePassword(changePasswordDto)).RequireAuthorization();
+app.MapPost("/ChangeUserNameAndEmail", async (UserNameAndMailDto userNameAndMailDto) => await userManager.ChangeUserNameAndEmail(userNameAndMailDto)).RequireAuthorization();
+app.MapGet("/AuthCheck", () => userManager.CheckAuthentication()).RequireAuthorization();
+app.MapGet("/LogOut", () => userManager.Logout()).RequireAuthorization();
+app.MapGet("/GetUser", (string userName) => userManager.GetUser(userName)).RequireAuthorization();
+app.MapGet("/GetUserNameAndMail", () => userManager.GetUserNameAndMail()).RequireAuthorization();
 #endregion
 
 app.Run();
