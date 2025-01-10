@@ -64,4 +64,15 @@ export class UserAdminService {
         })
       );
   }
+
+  deleteUser(userId: number) {
+    return this.httpClient
+      .delete('https://localhost:7501/admin/DeleteUser/' + userId)
+      .pipe(
+        catchError((error) => {
+          const errorMessage = error.error;
+          return throwError(() => new Error(errorMessage.detail));
+        })
+      );
+  }
 }

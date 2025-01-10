@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using QuizAPI.AdminManager;
-using QuizAPI.Authorization;
 using QuizAPI.Commands;
 using QuizAPI.DbContext;
 using QuizAPI.Dto;
@@ -23,13 +22,14 @@ builder.Services.AddCors(options =>
                .AllowAnyHeader()
                .AllowCredentials();
     });
+    
 });
 
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
+}).AddJwtBearer(options => 
 {
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
@@ -66,7 +66,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-
 builder.Services.AddAuthorization();
 builder.Services.AddHttpClient("Auth", x => x.BaseAddress = new Uri(builder.Configuration.GetValue<string>("AuthAPI")!));
 builder.Services.AddScoped<ApplicationDbContext>();
@@ -84,7 +83,6 @@ builder.Services.AddScoped<IGameManager, GameManager>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IUserAccessor, HttpUserAccessor>();
 builder.Services.AddScoped<IAdminManager, AdminManager>();
-builder.Services.AddScoped<IAuthorizeQuiz, AuthorizeQuiz>();
 
 var app = builder.Build();
 

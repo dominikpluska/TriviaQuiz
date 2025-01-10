@@ -62,11 +62,16 @@
       />
     </span>
     } @else {
-    <span class="grid grid-cols-2 gap-4">
+    <span class="grid grid-cols-3 gap-4">
       <app-button
         content="Save Changes"
         buttonClass="main"
         (buttonClick)="handleUpdate()"
+      />
+      <app-button
+        content="Delete"
+        buttonClass="delete"
+        (buttonClick)="handleDeleteUser()"
       />
       <app-button
         content="Discard"

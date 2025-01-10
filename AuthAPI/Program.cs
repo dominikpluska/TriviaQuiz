@@ -4,10 +4,8 @@ using AuthAPI.CookieGenerator;
 using AuthAPI.DbContext;
 using AuthAPI.Dto;
 using AuthAPI.JwtGenerator;
-using AuthAPI.Models;
 using AuthAPI.Repository;
 using AuthAPI.UserManager;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -54,6 +52,16 @@ builder.Services.AddAuthentication(options =>
                 context.Token = accessToken;
             }
             return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            Console.WriteLine($"Token validated for user: {context.Principal?.Identity?.Name}");
+            return Task.CompletedTask;
         }
     };
 });
@@ -77,7 +85,6 @@ app.UseAuthorization();
 using var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 await context.CreateModel();
-
 
 var userManager = scope.ServiceProvider.GetRequiredService<IUserManager>();
 var adminManager = scope.ServiceProvider.GetRequiredService<IAdminManager>();

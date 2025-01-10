@@ -19,7 +19,6 @@ namespace QuizAPI.GameManager
 {
     public class GameManager : IGameManager
     {
-        private readonly string _connectionString;
         private readonly int allowedActiveGameSessions;
         private readonly IConfiguration _configuration;
         private readonly IActiveGameSessionsCommands _activeGameSessionsCommands;
@@ -45,175 +44,201 @@ namespace QuizAPI.GameManager
             _authenticationService = authenticationService;
             _userAccessor = userAccessor;
             allowedActiveGameSessions = _configuration.GetValue<int>("GeneralSettings:NumberOfConnectionsAllowed")!;
-            _connectionString = _configuration.GetValue<string>("ConnectionStrings:DefaultConnection")!;
         }
 
-
-        //Improve this method! Handle how to close the game session and inform the user about it!
         public async Task<IResult> GetNextQuestion()
         {
-            var user  = _userAccessor.UserName;
-            var userData = await _authenticationService.GetUser(user);
-            UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
-
-            if (userToDisplayDto == null)
+            try
             {
-                return null;
+                var user = _userAccessor.UserName;
+                var userData = await _authenticationService.GetUser(user);
+                UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
+
+                if (userToDisplayDto == null)
+                {
+                    return null;
+                }
+
+                var activeTable = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
+                string guid = activeTable.GameSessionId;
+
+                if (guid == null)
+                {
+                    return Results.Ok("Finish");
+                }
+
+                var question5ScoreIds = await _tempGameSessionRepository.GetQuestionOf5Score(guid);
+                var question10ScoreIds = await _tempGameSessionRepository.GetQuestionOf10Score(guid);
+
+                int[] questionIdsToArray;
+
+                if (question5ScoreIds.Count() != 0)
+                {
+                    questionIdsToArray = question5ScoreIds.ToArray();
+                }
+                else
+                {
+                    questionIdsToArray = question10ScoreIds.ToArray();
+                }
+
+                if (questionIdsToArray.Length > 0)
+                {
+                    Random random = new();
+                    int index = random.Next(0, questionIdsToArray.Length - 1);
+
+                    QuestionDto getQuestion = await _tempGameSessionRepository.GetQuestion(guid, questionIdsToArray[index]);
+
+                    return Results.Ok(getQuestion);
+                }
+                else
+                {
+                    await CacheGameSession(guid);
+                    return Results.Ok("Finish");
+                }
             }
-
-            var activeTable = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
-            string guid = activeTable.GameSessionId;
-
-            if(guid == null)
+            catch (Exception ex)
             {
-                return Results.Ok("Finish");
+                return Results.Problem($"{ex.Message}");
             }
-    
-            var question5ScoreIds = await _tempGameSessionRepository.GetQuestionOf5Score(guid);
-            var question10ScoreIds = await _tempGameSessionRepository.GetQuestionOf10Score(guid);
-
-            int[] questionIdsToArray;
-
-            if(question5ScoreIds.Count() != 0)
-            {
-                questionIdsToArray = question5ScoreIds.ToArray();
-            }
-            else
-            {
-                questionIdsToArray = question10ScoreIds.ToArray();
-            }
-
-            if (questionIdsToArray.Length > 0)
-            {
-                Random random = new();
-                int index = random.Next(0, questionIdsToArray.Length - 1);
-
-                QuestionDto getQuestion = await _tempGameSessionRepository.GetQuestion(guid, questionIdsToArray[index]);
-
-                return Results.Ok(getQuestion);
-            }
-            else
-            {
-                //await CloseGameSession(guid);
-                await CacheGameSession(guid);
-                return Results.Ok("Finish");
-            }
-
 
         }
 
         public async Task<IResult> CheckForActiveGameSession()
         {
-            var currentUser = _userAccessor.UserName;
-            var userData = await _authenticationService.GetUser(currentUser);
-            UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
-
-            var activeGameSession = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
-
-            if (activeGameSession != null) 
+            try
             {
-                return Results.Ok(true);
+                var currentUser = _userAccessor.UserName;
+                var userData = await _authenticationService.GetUser(currentUser);
+                UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
+
+                var activeGameSession = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
+
+                if (activeGameSession != null)
+                {
+                    return Results.Ok(true);
+                }
+                else
+                {
+                    return Results.Ok(false);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return Results.Ok(false);
+                return Results.Problem($"{ex.Message}");
             }
         }
 
         //Might be optimized?
-        public async Task<GameSessionDto> GetGameSession(int userRequestedQuestions = 10)
+        public async Task<IResult> GetGameSession(int userRequestedQuestions = 10)
         {
-            //check if a there are available spots
-            int activeGameSessionsCount = await _activeGameSessionsRepository.GetActiveGameSessionCount();
-            var currentUser = _userAccessor.UserName;
-
-            if (activeGameSessionsCount >= allowedActiveGameSessions)
+            try 
             {
-                return new GameSessionDto()
+                //check if a there are available spots
+                int activeGameSessionsCount = await _activeGameSessionsRepository.GetActiveGameSessionCount();
+                var currentUser = _userAccessor.UserName;
+
+                if (activeGameSessionsCount >= allowedActiveGameSessions)
                 {
-                    GameSessionId = $"There is already {allowedActiveGameSessions} active game sessions! Please try again later!",
-                };
+                    return Results.Problem($"There is already {allowedActiveGameSessions} active game sessions! Please try again later!");
+                }
+
+                //check for game session
+                var user = await _authenticationService.GetUser(currentUser);
+                UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(user);
+
+                var checkForGameSession = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
+
+                if (checkForGameSession != null)
+                {
+                    return Results.Ok(checkForGameSession);
+                }
+
+                int questionsCount = await _questionRepository.GetQuestionCount();
+
+                if (questionsCount < userRequestedQuestions)
+                {
+                    throw new ApplicationException($"The questions count was less than {userRequestedQuestions}! The database must include at least {userRequestedQuestions} questions!");
+                }
+                else
+                {
+                    string randomTableName = GenerateRandomTableName();
+                    var questionCount = await _questionRepository.CalculateQuestionPercentage(randomTableName, userRequestedQuestions);
+                    var getLowScoreIdsSql = await _questionRepository.GetQuestion5Score();
+                    IEnumerable<int> LowScoreQuestions = GenerateRandomTable(getLowScoreIdsSql.ToArray(), questionCount!.LowerScorePercentage);
+
+                    var highScoreIds = await _questionRepository.GetQuestion10Score();
+                    IEnumerable<int> HighScoreQuestions = GenerateRandomTable(highScoreIds.ToArray(), questionCount!.HigherScorePercentage);
+
+                    var questionIdsList = LowScoreQuestions.Concat(HighScoreQuestions).ToArray();
+                    var questionsList = await _questionRepository.GetQuestionsForQuiz(questionIdsList);
+
+                    var activeGameSessionObject = ConstructActiveGameSessionObject(userToDisplayDto.userId);
+                    await _activeGameSessionsCommands.InsertActiveGameSession(activeGameSessionObject);
+
+                    await _tempGameSessionCommands.CreateTempTable(activeGameSessionObject.GameSessionId);
+                    await _tempGameSessionCommands.InsertQuestions(questionsList, activeGameSessionObject.GameSessionId);
+
+                    return Results.Ok(CreateGameSessionDto(activeGameSessionObject));
+                }
             }
-
-            //check for game session
-            var user = await _authenticationService.GetUser(currentUser);
-            UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(user);
-
-            var checkForGameSession = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
-
-            if (checkForGameSession != null)
+            catch (Exception ex)
             {
-                return checkForGameSession;
+                return Results.Problem($"{ex.Message}");
             }
-
-            int questionsCount = await _questionRepository.GetQuestionCount();
-
-            if (questionsCount < userRequestedQuestions)
-            {
-                throw new ApplicationException($"The questions count was less than {userRequestedQuestions}! The database must include at least {userRequestedQuestions} questions!");
-            }
-            else
-            {
-                string randomTableName = GenerateRandomTableName();
-                var questionCount = await _questionRepository.CalculateQuestionPercentage(randomTableName, userRequestedQuestions);
-                var getLowScoreIdsSql = await _questionRepository.GetQuestion5Score();
-                IEnumerable<int> LowScoreQuestions = GenerateRandomTable(getLowScoreIdsSql.ToArray(), questionCount!.LowerScorePercentage);
-
-                var highScoreIds = await _questionRepository.GetQuestion10Score();
-                IEnumerable<int> HighScoreQuestions = GenerateRandomTable(highScoreIds.ToArray(), questionCount!.HigherScorePercentage);
-
-                var questionIdsList = LowScoreQuestions.Concat(HighScoreQuestions).ToArray();
-                var questionsList = await _questionRepository.GetQuestionsForQuiz(questionIdsList);
-
-                var activeGameSessionObject = ConstructActiveGameSessionObject(userToDisplayDto.userId); 
-                await _activeGameSessionsCommands.InsertActiveGameSession(activeGameSessionObject);
-
-                await _tempGameSessionCommands.CreateTempTable(activeGameSessionObject.GameSessionId);
-                await _tempGameSessionCommands.InsertQuestions(questionsList, activeGameSessionObject.GameSessionId);
-
-                return CreateGameSessionDto(activeGameSessionObject);
-            }
-
         }
 
         public async Task<IResult> CheckCorrectAnswer(AnswerDto answerDto)
         {
-            var currentUser = _userAccessor.UserName;
-            var userData = await _authenticationService.GetUser(currentUser);
-            UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
-
-            var activeGameSession = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
-            string correctAnswer = await _tempGameSessionRepository.FindCorrectAnswer(activeGameSession.GameSessionId, answerDto.QuestionId);
-
-            if (correctAnswer == answerDto.Answer)
+            try
             {
-                await _tempGameSessionCommands.PostAnswer(activeGameSession.GameSessionId, answerDto.QuestionId, 1);
-                return Results.Ok("Correct");
+                var currentUser = _userAccessor.UserName;
+                var userData = await _authenticationService.GetUser(currentUser);
+                UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
+
+                var activeGameSession = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
+                string correctAnswer = await _tempGameSessionRepository.FindCorrectAnswer(activeGameSession.GameSessionId, answerDto.QuestionId);
+
+                if (correctAnswer == answerDto.Answer)
+                {
+                    await _tempGameSessionCommands.PostAnswer(activeGameSession.GameSessionId, answerDto.QuestionId, 1);
+                    return Results.Ok("Correct");
+                }
+                else
+                {
+                    await _tempGameSessionCommands.PostAnswer(activeGameSession.GameSessionId, answerDto.QuestionId, 0);
+                    return Results.Ok("Incorrect");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await _tempGameSessionCommands.PostAnswer(activeGameSession.GameSessionId, answerDto.QuestionId, 0);
-                return Results.Ok("Incorrect");
+                return Results.Problem($"{ex.Message}");
             }
         }
 
         public async Task<IResult> CloseGameSession()
         {
-            var user = _userAccessor.UserName;
-            var userData = await _authenticationService.GetUser(user);
-            UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
-
-            if (userToDisplayDto == null)
+            try
             {
-                return null;
-            }
+                var user = _userAccessor.UserName;
+                var userData = await _authenticationService.GetUser(user);
+                UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
 
-            var activeTable = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
-            string guid = activeTable.GameSessionId;
-            //Drop Active game session and the temp table
-            await _tempGameSessionCommands.DropTempTable(guid);
-            await _activeGameSessionsCommands.RemoveGameSession(guid);
-            return Results.Ok("Game session has been terminated!");
+                if (userToDisplayDto == null)
+                {
+                    return Results.Problem("User was empty!");
+                }
+
+                var activeTable = await _activeGameSessionsRepository.GetActiveGameSession(userToDisplayDto.userId);
+                string guid = activeTable.GameSessionId;
+                //Drop Active game session and the temp table
+                await _tempGameSessionCommands.DropTempTable(guid);
+                await _activeGameSessionsCommands.RemoveGameSession(guid);
+                return Results.Ok("Game session has been terminated!");
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem($"{ex.Message}");
+            }
         }
 
         private static ActiveGameSession ConstructActiveGameSessionObject(int userId)
@@ -224,30 +249,6 @@ namespace QuizAPI.GameManager
             };
 
             return activeGameSession;
-        }
-
-        //Private methods
-        private static string CreateSelectQuestionsSqlStatement(int[] questionIds)
-        {
-            string convertedIds = "";
-            for (int i = 0; questionIds.Length > i; i++)
-            {
-                if (i == 0)
-                {
-                    convertedIds += $"({questionIds[i]},";
-                }
-                else if (i == questionIds.Length - 1)
-                {
-                    convertedIds += $"{questionIds[i]})";
-                }
-                else
-                {
-                    convertedIds += $"{questionIds[i]},";
-                }
-            }
-
-            string sql = $"Select * from Questions where QuestionId IN {convertedIds}";
-            return sql;
         }
 
         private static string GenerateRandomTableName()

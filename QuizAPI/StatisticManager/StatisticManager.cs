@@ -22,60 +22,79 @@ namespace QuizAPI.StatisticManager
 
         public async Task<IResult> GetLastPlayedGame()
         {
-            var user = _userAccessor.UserName;
-            var userData = await _authenticationService.GetUser(user);
-            UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
+            try
+            {
+                var user = _userAccessor.UserName;
+                var userData = await _authenticationService.GetUser(user);
+                UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
 
-            var lastPlayedGame = await _cahedGameSessionRepository.GetLastGameStatisticsAsync(userToDisplayDto.userId);
+                var lastPlayedGame = await _cahedGameSessionRepository.GetLastGameStatisticsAsync(userToDisplayDto.userId);
 
-            return Results.Ok(lastPlayedGame);
-
+                return Results.Ok(lastPlayedGame);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem($"{ex.Message}");
+            }
         }
 
         public async Task<IResult> GetAllPlayedGames()
         {
-            var user = _userAccessor.UserName;
-            var userData = await _authenticationService.GetUser(user);
-            UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
+            try
+            {
+                var user = _userAccessor.UserName;
+                var userData = await _authenticationService.GetUser(user);
+                UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
 
-            var gamesList = await _cahedGameSessionRepository.GetListOfPlayedGames(userToDisplayDto.userId);
+                var gamesList = await _cahedGameSessionRepository.GetListOfPlayedGames(userToDisplayDto.userId);
 
-            return Results.Ok(gamesList);
-
+                return Results.Ok(gamesList);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem($"{ex.Message}");
+            }
         }
 
         public async Task<IResult> GetGameSessionStats(string gamesessionId)
         {
-            if(gamesessionId == null || gamesessionId == string.Empty)
+            try
             {
-                return Results.BadRequest("GameSessionId is empty!");
-            }
-            var user = _userAccessor.UserName;
-            var userData = await _authenticationService.GetUser(user);
-            UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
+                if (gamesessionId == null || gamesessionId == string.Empty)
+                {
+                    return Results.BadRequest("GameSessionId is empty!");
+                }
+                var user = _userAccessor.UserName;
+                var userData = await _authenticationService.GetUser(user);
+                UserToDisplayDto userToDisplayDto = JsonSerializer.Deserialize<UserToDisplayDto>(userData)!;
 
-            var game = await _cahedGameSessionRepository.GetGameSessionStatistic(gamesessionId);
-            if(game == null)
-            {
-                return Results.BadRequest("Game Cache does not exist!");
-            }
-            CachedGameSessionDto cachedGameSessionDto = new()
-            {
-                TotalQuestionCount = game.TotalQuestionCount,
-                AnsweredQuestions = game.AnsweredQuestions,
-                GameSessionId = game.GameSessionId,
-                Score = game.Score,
-                SessionTime = game.SessionTime,
-                Questions = JsonSerializer.Deserialize<IEnumerable<QuestionsCaching>>(game.Questions)!
-            };
+                var game = await _cahedGameSessionRepository.GetGameSessionStatistic(gamesessionId);
+                if (game == null)
+                {
+                    return Results.BadRequest("Game Cache does not exist!");
+                }
+                CachedGameSessionDto cachedGameSessionDto = new()
+                {
+                    TotalQuestionCount = game.TotalQuestionCount,
+                    AnsweredQuestions = game.AnsweredQuestions,
+                    GameSessionId = game.GameSessionId,
+                    Score = game.Score,
+                    SessionTime = game.SessionTime,
+                    Questions = JsonSerializer.Deserialize<IEnumerable<QuestionsCaching>>(game.Questions)!
+                };
 
-            if (game.UserId == userToDisplayDto.userId)
-            {
-                return Results.Ok(cachedGameSessionDto);
+                if (game.UserId == userToDisplayDto.userId)
+                {
+                    return Results.Ok(cachedGameSessionDto);
+                }
+                else
+                {
+                    return Results.Unauthorized();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return Results.Unauthorized();
+                return Results.Problem($"{ex.Message}");
             }
         }
     }

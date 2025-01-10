@@ -26,10 +26,10 @@ namespace AuthAPI.JwtGenerator
 
         }
 
-        public string GenerateToken(string userName)
+        public string GenerateToken(string userName, int isAdmin)
         {
             List<Claim> claims = new();
-            claims.Add(new Claim(ClaimTypes.Name, userName));
+            claims.Add(new Claim(ClaimTypes.Name, userName, ClaimTypes.Role, isAdmin == 1 ? "GameMaster" : "User"));
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_tokenString));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

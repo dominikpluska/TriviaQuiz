@@ -157,6 +157,27 @@ export class UserDetailsAdminPageComponent implements OnInit {
     }
   }
 
+  handleDeleteUser() {
+    const subscription = this.usersService
+      .deleteUser(this.user.userId)
+      .pipe(
+        catchError((error) => {
+          return throwError(() => new Error(error));
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          this.wasSuccess = true;
+          this.errorMessage = '';
+        },
+        error: (error) => {
+          this.errorMessage = error;
+          this.wasSuccess = false;
+        },
+      });
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
+  }
+
   ResetComponent() {
     this.FetchUser();
     this.wasSuccess = false;
